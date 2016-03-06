@@ -53,6 +53,10 @@ TouchOverlayController::~TouchOverlayController()
 	DisconnectServer();
 }
 
+bool TouchOverlayController::isInMockMode() {
+	return _mockMode;
+}
+
 /*
  * Method Overview: Starts the Touch Overlay Controller
  * Parameters (1): Instance of the Communication Manager server
@@ -61,6 +65,9 @@ TouchOverlayController::~TouchOverlayController()
  */
 int TouchOverlayController::Init(CommandCenter* pCommander, GUIManager* pGUI)
 {
+	// initially set mock mode to false -- assume that multitouch system will be used
+	_mockMode = false;
+
 	//Sets the CommandCenter instance as own
 	myCommander = pCommander;
 
@@ -80,7 +87,12 @@ int TouchOverlayController::Init(CommandCenter* pCommander, GUIManager* pGUI)
 	cout << " connect to server..." << endl;
 	if((err_code = ConnectServer()) != PQMTE_SUCCESS){
 		cout << " connect server fail, socket error code:" << err_code << endl;
-		return err_code;
+
+		cout << "mock mode enabled... going to only support mouse clicks" << endl;
+		_mockMode = true;
+		return PQMTE_SUCCESS;
+
+		//return err_code;
 	}
 	// send request to server
 	cout << " connect success, send request." << endl;

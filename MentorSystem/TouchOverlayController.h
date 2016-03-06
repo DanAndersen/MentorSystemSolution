@@ -63,6 +63,15 @@ public:
 	static GUIManager* myGUI;
 	
 private:
+
+	// if true, then don't actually use the multitouch system,
+	// just use mouseclicks to simulate functionality for dev purposes
+	bool _mockMode;
+
+	bool isInMockMode();
+
+
+
 	//-------------------------Methods---------------------------//
 		//----------------Call Back Methods------------------//
 	//Method to handle when recieve touch point frame

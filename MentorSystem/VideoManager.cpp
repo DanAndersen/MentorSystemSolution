@@ -35,6 +35,8 @@ VideoManager::VideoManager(CommunicationManager* server, CommandCenter* pCommand
 	//rescamY = 400; //Tablet resolution
 	rescamY = 480; //Webcam resolution
 
+	std::cout << "TODO: set up the correct resolution for incoming frames" << std::endl;
+
 	//Screen constants
 	rescompX = 1920;
 	rescompY = 1080;
@@ -79,6 +81,14 @@ void VideoManager::initWindow()
 	char* sockData;
 	//Allocates enough memory for the buffer.
 	sockData = (char *)malloc(sizeof(char)*imgSize+1);
+
+
+
+
+	_videoDecoder.initDecoder(rescamX, rescamY);
+
+
+
 
 	//Infinite loop to obtain and create an image to be displayed
 	while(1)
@@ -134,6 +144,8 @@ void VideoManager::initWindow()
 			setOpenCVImage(GUIcreator->createGUI(show));
 		}
 	}
+
+	_videoDecoder.destroyDecoder();
 }
 
 /*

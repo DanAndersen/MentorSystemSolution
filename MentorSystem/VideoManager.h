@@ -33,6 +33,7 @@
 #include "GUIManager.h"//Methods used to create the GUI
 #include "touchCommands.h"//Touch events standard commands
 #include "communicationDefinitions.h"//Socket-related definitions
+#include "VideoDecoder.h"	// used for decoding FFMPEG frames from trainee system
 
 using namespace cv;//OpenCV Standard
 
@@ -94,6 +95,8 @@ private:
 
 	//Instance of the GUI creator
 	GUIManager* GUIcreator;
+
+	VideoDecoder _videoDecoder;
 };
 
 #endif

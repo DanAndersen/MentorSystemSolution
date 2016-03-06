@@ -1,7 +1,36 @@
-﻿Build started 3/6/2016 12:37:20 PM.
+﻿Build started 3/6/2016 1:41:03 PM.
      1>Project "C:\MentorSystem\MentorSystem\OpenCV_Test.vcxproj" on node 2 (Build target(s)).
-     1>Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\MentorSystem\Debug\MentorSystem.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\MentorSystem\Libraries\PQClient\lib /LIBPATH:"C:\MentorSystem\Libraries\glew-1.11.0\lib" /LIBPATH:C:\MentorSystem\Libraries\freeglut\lib /LIBPATH:C:\MentorSystem\Libraries\opencv\build\x86\vc11\lib PQMTClient.lib glew32.lib freeglut.lib opencv_stitching249d.lib opencv_contrib249d.lib opencv_videostab249d.lib opencv_superres249d.lib opencv_nonfree249d.lib opencv_gpu249d.lib opencv_ocl249d.lib opencv_legacy249d.lib opencv_ts249d.lib opencv_calib3d249d.lib opencv_features2d249d.lib opencv_objdetect249d.lib opencv_highgui249d.lib opencv_video249d.lib opencv_photo249d.lib opencv_imgproc249d.lib opencv_flann249d.lib opencv_ml249d.lib opencv_core249d.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\MentorSystem\Debug\MentorSystem.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\MentorSystem\Debug\MentorSystem.lib" /MACHINE:X86 Debug\Annotation.obj
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /IC:\MentorSystem\Libraries\PQClient\include /I"C:\MentorSystem\Libraries\glew-1.11.0\include" /IC:\MentorSystem\Libraries\freeglut\include /IC:\MentorSystem\Libraries\opencv\build\include /IC:\MentorSystem\Libraries\ffmpeg32\include /IC:\MentorSystem\Libraries\msinttypes\include /Zi /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Annotation.cpp AnnotationsManager.cpp CommandCenter.cpp GUIManager.cpp jsoncpp.cpp JSONManager.cpp LiangBarsky.cpp LineAnnotation.cpp MentorSystemMain.cpp Mapping.cpp NetworkServices.cpp TouchOverlayController.cpp CommunicationManager.cpp ServerNetwork.cpp VideoDecoder.cpp VideoManager.cpp VirtualAnnotation.cpp
+         VirtualAnnotation.cpp
+         VideoManager.cpp
+         VideoDecoder.cpp
+         ServerNetwork.cpp
+         CommunicationManager.cpp
+         TouchOverlayController.cpp
+         NetworkServices.cpp
+         Mapping.cpp
+         MentorSystemMain.cpp
+         LineAnnotation.cpp
+         LiangBarsky.cpp
+         JSONManager.cpp
+         jsoncpp.cpp
+         GUIManager.cpp
+         CommandCenter.cpp
+         AnnotationsManager.cpp
+     1>C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xutility(2176): warning C4996: 'std::_Copy_impl': Function call with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct. To disable this warning, use -D_SCL_SECURE_NO_WARNINGS. See documentation on how to use Visual C++ 'Checked Iterators'
+                 C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xutility(2157) : see declaration of 'std::_Copy_impl'
+                 AnnotationsManager.cpp(936) : see reference to function template instantiation '_OutIt std::copy<std::_String_iterator<_Mystr>,char*>(_InIt,_InIt,_OutIt)' being compiled
+                 with
+                 [
+                     _OutIt=char *,
+                     _Mystr=std::_String_val<std::_Simple_types<char>>,
+                     _InIt=std::_String_iterator<std::_String_val<std::_Simple_types<char>>>
+                 ]
+         Annotation.cpp
+         Generating Code...
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\MentorSystem\Debug\MentorSystem.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:\MentorSystem\Libraries\PQClient\lib /LIBPATH:"C:\MentorSystem\Libraries\glew-1.11.0\lib" /LIBPATH:C:\MentorSystem\Libraries\freeglut\lib /LIBPATH:C:\MentorSystem\Libraries\opencv\build\x86\vc11\lib /LIBPATH:C:\MentorSystem\Libraries\ffmpeg32\lib PQMTClient.lib glew32.lib freeglut.lib opencv_stitching249d.lib opencv_contrib249d.lib opencv_videostab249d.lib opencv_superres249d.lib opencv_nonfree249d.lib opencv_gpu249d.lib opencv_ocl249d.lib opencv_legacy249d.lib opencv_ts249d.lib opencv_calib3d249d.lib opencv_features2d249d.lib opencv_objdetect249d.lib opencv_highgui249d.lib opencv_video249d.lib opencv_photo249d.lib opencv_imgproc249d.lib opencv_flann249d.lib opencv_ml249d.lib opencv_core249d.lib avcodec.lib avdevice.lib avfilter.lib avformat.lib avutil.lib postproc.lib swresample.lib swscale.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\MentorSystem\Debug\MentorSystem.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\MentorSystem\Debug\MentorSystem.lib" /MACHINE:X86 Debug\Annotation.obj
          Debug\AnnotationsManager.obj
          Debug\CommandCenter.obj
          Debug\GUIManager.obj
@@ -15,6 +44,7 @@
          Debug\TouchOverlayController.obj
          Debug\CommunicationManager.obj
          Debug\ServerNetwork.obj
+         Debug\VideoDecoder.obj
          Debug\VideoManager.obj
          Debug\VirtualAnnotation.obj
          OpenCV_Test.vcxproj -> C:\MentorSystem\Debug\MentorSystem.exe
@@ -22,4 +52,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.48
+Time Elapsed 00:00:27.18
