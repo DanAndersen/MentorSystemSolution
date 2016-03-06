@@ -1,0 +1,2 @@
+# ignore the opencv directory because it's huge
+Libraries/opencv
