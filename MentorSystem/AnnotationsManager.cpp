@@ -64,17 +64,6 @@ LiangBarsky* my_clip_window;
 //Map Manager instance
 Mapping* MapManager;
 
-//--------------------------Functions----------------------------//
-/*
- * Method Overview: Method to round a number
- * Parameters: Number to be rounded
- * Return: Rounded number
- */
-long double round(long double number)
-{
-    return number < 0.0 ? ceil(number - 0.5) : floor(number + 0.5);
-}
-
 /*
  * Method Overview: Adds point to the line currently being created
  * Parameters: Line ID, X and Y coordinates of the point to add
@@ -545,10 +534,10 @@ void drawLines()
 			int controls[3] = {0,0,0};
 
 			//fills the [xin,yin,xfin,yfin] array
-			numbers[0] = (int)round(to_draw->getPoints()->at(i));
-			numbers[1] = (int)round(to_draw->getPoints()->at(i+1));
-			numbers[2] = (int)round(to_draw->getPoints()->at(i+2));
-			numbers[3] = (int)round(to_draw->getPoints()->at(i+3));
+			numbers[0] = (int)roundl(to_draw->getPoints()->at(i));
+			numbers[1] = (int)roundl(to_draw->getPoints()->at(i+1));
+			numbers[2] = (int)roundl(to_draw->getPoints()->at(i+2));
+			numbers[3] = (int)roundl(to_draw->getPoints()->at(i+3));
 
 			//Liang-Barskey clipping algorithm evaluation
 			if (my_clip_window->clip_line(&numbers[0], &numbers[1], &numbers[2], &numbers[3]))

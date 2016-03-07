@@ -38,8 +38,6 @@
 using namespace std;//Standard Library
 
 //--------------------------Functions----------------------------//
-//Rounds a number
-long double round(long double number);
 
 //Adds a point to a line that is currently being created
 void addPoint(int id, long double x, long double y);

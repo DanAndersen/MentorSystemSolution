@@ -18,6 +18,7 @@
 
 //Include its header file
 #include "VideoManager.h"
+#include <bitset>
 
 /*
  * Method Overview: Constructor of the class
@@ -32,8 +33,10 @@ VideoManager::VideoManager(CommunicationManager* server, CommandCenter* pCommand
 
 	//Image constants
 	rescamX = 640;
-	//rescamY = 400; //Tablet resolution
-	rescamY = 480; //Webcam resolution
+	rescamY = 400; //Tablet resolution
+	//rescamY = 480; //Webcam resolution
+
+	this->_usingVideoDecoder = true;
 
 	std::cout << "TODO: set up the correct resolution for incoming frames" << std::endl;
 
@@ -74,7 +77,7 @@ void VideoManager::initWindow()
 
 	//Creates a matrix of zeros. 
 	//The size of it will be the size of the obtained webcam image
-	Mat img = Mat::zeros(rescamX,rescamY,CV_8UC3);
+	Mat img = Mat::zeros(rescamY, rescamX, CV_8UC3);
 	//Calculates the total size of image matriz recently created
 	int imgSize = (int)(img.total()*img.elemSize());
 	//Buffer to store the receieve data stream in
@@ -98,42 +101,87 @@ void VideoManager::initWindow()
 		//Add or remove the /**/ right before and after the ///////
 		///////////////////////////////////////////////////////////
 		
-		//Receives the image data stream from the client
-		int data_length = myServer->receiveFromClients(sockData, imgSize, VIDEO_NETWORK_CODE);
+		bool receivedNewFrame = false;
 
-		if (data_length <= 0) 
-        {
-			//nodata or incomplete data
-            continue;
-        }
+		if (this->_usingVideoDecoder) {
 
-		//Creates an image from the just obtained data stream
-		Mat img(Size(rescamX, rescamY), CV_8UC3, sockData);
-		
-		///////////////////////////////////////////////////////////
+			int BYTES_FOR_LENGTH_MESSAGE = 4;
 
-		/*
-		 * Comment when using video streaming
-		 * Uncomment when using an image as the background
-		 */
-		//img = imread("../images/surgical_room.jpg");
-		
-		//Flips the image around both axis (to fit OpenGL window)
-		flip(img,flipped,0);
-		
-		//Rotation starts here
-		//Finds the center of the region of interest
-		Point2f pc(((br.x-tl.x)/2.0f)+tl.x, ((br.y-tl.y)/2.0f)+tl.y);
+			// first, get the size of the packet (sent as a 4-byte int before the packet)
+			int numBytesReadForPacketSizeReceipt = myServer->receiveFromClients(sockData, BYTES_FOR_LENGTH_MESSAGE, VIDEO_NETWORK_CODE);
+			std::cout << "read in " << numBytesReadForPacketSizeReceipt << " bytes, telling us how many bytes the packet is" << std::endl;
 
-		//Creates a rotation matrix around the center of the roi
-		temp = getRotationMatrix2D(pc, rotationDegree, 1.0);
+			if (numBytesReadForPacketSizeReceipt == BYTES_FOR_LENGTH_MESSAGE) {
+				int packetSizeInBytes = ((unsigned char)sockData[3] << 24) | ((unsigned char)sockData[2] << 16) | ((unsigned char)sockData[1] << 8) | ((unsigned char)sockData[0]); // assumes big-endian
 
-		//Applies the rotation matrix to every pixel on the image
-		warpAffine(flipped, rotated, temp, flipped.size());
-		//Rotation ends here
-		
-		//Resizes the image
-		resize(rotated(roi),show,size);
+				//std::cout << "packetSizeInBytes: " << packetSizeInBytes << std::endl;
+
+				// then, get the packet itself
+				int numBytesReadForPacket = myServer->receiveFromClients(sockData, packetSizeInBytes, VIDEO_NETWORK_CODE);
+				//std::cout << "read in " << numBytesReadForPacket << " bytes, containing the packet" << std::endl;
+
+				if (numBytesReadForPacket == packetSizeInBytes) {
+					// then decode the packet
+
+					receivedNewFrame = this->_videoDecoder.decode(sockData, packetSizeInBytes, &img);
+					//std::cout << "received new frame? " << receivedNewFrame << std::endl;
+				}
+				else {
+					std::cout << "error: didn't read the right number of bytes for the packet" << std::endl;
+				}
+			}
+			else {
+				std::cout << "error: didn't read in the right number of bytes for the packet length" << std::endl;
+			}
+		}
+		else {
+			// original method of sending frames -- uncompressed bitmaps
+
+			//Receives the image data stream from the client
+			int data_length = myServer->receiveFromClients(sockData, imgSize, VIDEO_NETWORK_CODE);
+
+			if (data_length <= 0)
+			{
+				//nodata or incomplete data
+				continue;
+			}
+
+			//Creates an image from the just obtained data stream
+			Mat img(Size(rescamX, rescamY), CV_8UC3, sockData);
+
+			receivedNewFrame = true;
+		}
+
+
+		if (receivedNewFrame) {
+
+			std::cout << "received new frame, dimensions are: " << img.size().width << ", " << img.size().height << std::endl;
+			///////////////////////////////////////////////////////////
+
+			/*
+			* Comment when using video streaming
+			* Uncomment when using an image as the background
+			*/
+			//img = imread("../images/surgical_room.jpg");
+
+			//Flips the image around both axis (to fit OpenGL window)
+			flip(img, flipped, 0);
+
+			//Rotation starts here
+			//Finds the center of the region of interest
+			Point2f pc(((br.x - tl.x) / 2.0f) + tl.x, ((br.y - tl.y) / 2.0f) + tl.y);
+
+			//Creates a rotation matrix around the center of the roi
+			temp = getRotationMatrix2D(pc, rotationDegree, 1.0);
+
+			//Applies the rotation matrix to every pixel on the image
+			warpAffine(flipped, rotated, temp, flipped.size());
+			//Rotation ends here
+
+			//Resizes the image
+			resize(rotated(roi), show, size);
+		}
+
 
 		//Enables the image to be controlled by keyboard events
 		keyboardInteractions();

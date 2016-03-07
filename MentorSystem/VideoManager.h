@@ -97,6 +97,7 @@ private:
 	GUIManager* GUIcreator;
 
 	VideoDecoder _videoDecoder;
+	bool _usingVideoDecoder;
 };
 
 #endif
