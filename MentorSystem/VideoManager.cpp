@@ -87,15 +87,25 @@ void VideoManager::initWindow()
 
 
 
+	if (this->_usingVideoDecoder) {
+		_videoDecoder.initDecoder(rescamX, rescamY);
+	}
 
-	_videoDecoder.initDecoder(rescamX, rescamY);
 
-
-
+	LARGE_INTEGER time_start_video_loop, time_end_video_loop, freq;
+	QueryPerformanceFrequency(&freq);
 
 	//Infinite loop to obtain and create an image to be displayed
 	while(1)
 	{	
+		QueryPerformanceCounter(&time_start_video_loop);
+		
+
+		
+		LARGE_INTEGER time_start_receive_frame;
+		QueryPerformanceCounter(&time_start_receive_frame);
+
+
 		//Remove the /**/ when using video streaming
 		//Comment with /**/ when using an image as the background
 		//Add or remove the /**/ right before and after the ///////
@@ -147,13 +157,26 @@ void VideoManager::initWindow()
 			}
 
 			//Creates an image from the just obtained data stream
-			Mat img(Size(rescamX, rescamY), CV_8UC3, sockData);
+			Mat img(rescamY, rescamX, CV_8UC3, sockData);
 
 			receivedNewFrame = true;
 		}
 
+		LARGE_INTEGER time_end_receive_frame;
+		QueryPerformanceCounter(&time_end_receive_frame);
+		{
+			auto durationSeconds = ((time_end_receive_frame.QuadPart - time_start_receive_frame.QuadPart) / (double)freq.QuadPart);
+			std::cout << "receive_frame duration: " << durationSeconds << " sec" << std::endl;
+		}
+
+
+
+
 
 		if (receivedNewFrame) {
+
+			LARGE_INTEGER time_start_manipulate_image;
+			QueryPerformanceCounter(&time_start_manipulate_image);
 
 			std::cout << "received new frame, dimensions are: " << img.size().width << ", " << img.size().height << std::endl;
 			///////////////////////////////////////////////////////////
@@ -180,7 +203,17 @@ void VideoManager::initWindow()
 
 			//Resizes the image
 			resize(rotated(roi), show, size);
+
+
+			LARGE_INTEGER time_end_manipulate_image;
+			QueryPerformanceCounter(&time_end_manipulate_image);
+			{
+				auto durationSeconds = ((time_end_manipulate_image.QuadPart - time_start_manipulate_image.QuadPart) / (double)freq.QuadPart);
+				std::cout << "manipulate image duration: " << durationSeconds << " sec" << std::endl;
+			}
 		}
+		
+		
 
 
 		//Enables the image to be controlled by keyboard events
@@ -189,11 +222,39 @@ void VideoManager::initWindow()
 		if(!show.empty())
 		{	
 			//OpenGL Call
+
+
+			LARGE_INTEGER time_start_create_gui;
+			QueryPerformanceCounter(&time_start_create_gui);
+
+
+
+
 			setOpenCVImage(GUIcreator->createGUI(show));
+
+
+			LARGE_INTEGER time_end_create_gui;
+			QueryPerformanceCounter(&time_end_create_gui);
+			{
+				auto durationSeconds = ((time_end_create_gui.QuadPart - time_start_create_gui.QuadPart) / (double)freq.QuadPart);
+				std::cout << "create_gui duration: " << durationSeconds << " sec" << std::endl;
+			}
+
+
+
 		}
+
+		QueryPerformanceCounter(&time_end_video_loop);
+		{
+			auto durationSeconds = ((time_end_video_loop.QuadPart - time_start_video_loop.QuadPart) / (double)freq.QuadPart);
+			std::cout << "video loop duration: " << durationSeconds << " sec" << std::endl;
+		}
+
 	}
 
-	_videoDecoder.destroyDecoder();
+	if (this->_usingVideoDecoder) {
+		_videoDecoder.destroyDecoder();
+	}
 }
 
 /*
