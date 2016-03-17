@@ -227,11 +227,7 @@ void VideoManager::initWindow()
 			LARGE_INTEGER time_start_create_gui;
 			QueryPerformanceCounter(&time_start_create_gui);
 
-
-
-
-			setOpenCVImage(GUIcreator->createGUI(show));
-
+			Mat backgroundWithGUI = GUIcreator->createGUI(show);
 
 			LARGE_INTEGER time_end_create_gui;
 			QueryPerformanceCounter(&time_end_create_gui);
@@ -241,7 +237,18 @@ void VideoManager::initWindow()
 			}
 
 
+			LARGE_INTEGER time_start_set_image;
+			QueryPerformanceCounter(&time_start_set_image);
 
+			//setOpenCVImage(backgroundWithGUI);
+			updateBackgroundOpenCVImage(backgroundWithGUI);
+
+			LARGE_INTEGER time_end_set_image;
+			QueryPerformanceCounter(&time_end_set_image);
+			{
+				auto durationSeconds = ((time_end_set_image.QuadPart - time_start_set_image.QuadPart) / (double)freq.QuadPart);
+				std::cout << "set_image duration: " << durationSeconds << " sec" << std::endl;
+			}
 		}
 
 		QueryPerformanceCounter(&time_end_video_loop);

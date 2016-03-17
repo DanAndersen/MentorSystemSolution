@@ -30,6 +30,7 @@
     <ClCompile Include="MentorSystemMain.cpp" />
     <ClCompile Include="Mapping.cpp" />
     <ClCompile Include="NetworkServices.cpp" />
+    <ClCompile Include="RenderManager.cpp" />
     <ClCompile Include="TouchOverlayController.cpp" />
     <ClCompile Include="CommunicationManager.cpp" />
     <ClCompile Include="ServerNetwork.cpp" />
@@ -53,6 +54,7 @@
     <ClInclude Include="LiangBarsky.h" />
     <ClInclude Include="Mapping.h" />
     <ClInclude Include="NetworkServices.h" />
+    <ClInclude Include="RenderManager.h" />
     <ClInclude Include="TouchOverlayController.h" />
     <ClInclude Include="CommunicationManager.h" />
     <ClInclude Include="ServerNetwork.h" />

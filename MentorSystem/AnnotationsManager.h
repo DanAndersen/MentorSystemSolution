@@ -114,3 +114,5 @@ void refresh();
 
 //Inits framebuffer and the OpenGL environment
 void initWindow(int argc, char* argv[], int resX, int resY, CommandCenter* pCommander, JSONManager* pJSON);
+
+void updateBackgroundOpenCVImage(cv::Mat image);

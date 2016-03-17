@@ -856,6 +856,80 @@ void OpenGLtouchControls(int command, int id, long double x, long double y)
 	glutPostRedisplay();
 }
 
+
+
+cv::Mat _currentBackgroundOpenCVImage;
+bool _readyToUpdateBackgroundImage = true;
+bool _hasReceivedBackgroundImage = false;
+
+bool _testTextureInitialized = false;
+GLuint _backgroundTextureId;
+
+// updates current opencv image to be used for background
+void updateBackgroundOpenCVImage(cv::Mat image) {
+	if (_readyToUpdateBackgroundImage) {
+		std::cout << "ready to update background image" << std::endl;
+		image.copyTo(_currentBackgroundOpenCVImage);
+		_readyToUpdateBackgroundImage = false;
+		_hasReceivedBackgroundImage = true;
+	}
+	else {
+		std::cout << "not ready to update background image" << std::endl;
+	}
+}
+
+void init_test_texture() {
+	std::cout << "initing background texture" << std::endl;
+
+	glEnable(GL_TEXTURE_2D);
+
+	glGenTextures(1, &_backgroundTextureId);
+	glBindTexture(GL_TEXTURE_2D, _backgroundTextureId);
+
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	int num_channels = _currentBackgroundOpenCVImage.channels();
+	int w = _currentBackgroundOpenCVImage.size().width;
+	int h = _currentBackgroundOpenCVImage.size().height;
+
+	/*
+	unsigned char* pointer = (unsigned char*)malloc(w * h * num_channels);
+
+	std::cout << "making data for test texture" << std::endl;
+	int index = 0;
+	for (int j = 0; j < h; j++) {
+		for (int i = 0; i < w; i++) {
+
+			pointer[index + 0] = (unsigned char)(i);
+			pointer[index + 1] = (unsigned char)(128);
+			pointer[index + 2] = (unsigned char)(j);
+
+			index += num_channels;
+		}
+	}
+	std::cout << "made data for test texture" << std::endl;
+	*/
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, _currentBackgroundOpenCVImage.data);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	_testTextureInitialized = true;
+}
+
+
+
+
+
+
+
+
+
+
 /*
  * Method Overview: Sets an image as the scene background
  * Parameters: Image to draw in background
@@ -988,6 +1062,24 @@ int pointInPolygon(vector<long double> roi_extremes)
 	return selected;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*
  * Method Overview: OpenGL pixel coloring for framebuffer positions
  * Parameters: None
@@ -1037,6 +1129,56 @@ void draw_scene()
 			last_x = i;
 		}
 	}
+
+
+	if (_hasReceivedBackgroundImage) {
+		if (!_testTextureInitialized) {
+			init_test_texture();
+		}
+
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, _backgroundTextureId);
+
+		if (!_readyToUpdateBackgroundImage) {
+
+			int w = _currentBackgroundOpenCVImage.size().width;
+			int h = _currentBackgroundOpenCVImage.size().height;
+
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, _currentBackgroundOpenCVImage.data);
+
+			_readyToUpdateBackgroundImage = true;
+		}
+
+		
+
+		// some testing about drawing polygons
+		glBegin(GL_QUADS);
+
+
+		glTexCoord2f(0.0, 0.0);
+		glVertex2f(100, 100);
+
+		glTexCoord2f(1.0, 0.0);
+		glVertex2f(200, 100);
+
+		glTexCoord2f(1.0, 1.0);
+		glVertex2f(200, 200);
+
+		glTexCoord2f(0.0, 1.0);
+		glVertex2f(100, 200);
+		glEnd();
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	
+
+
+
+	
+
+
+
 
 	glFlush();
 }

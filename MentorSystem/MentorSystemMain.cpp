@@ -29,6 +29,7 @@
 #include "TouchOverlayController.h"//PQLabs Overlay Controller
 #include "VideoManager.h"//OpenCV Video Manager
 #include <process.h>//Windows Threads
+#include "RenderManager.h"
 
 using namespace std;//Standard Libraries
 
@@ -39,11 +40,13 @@ GUIManager* GUIMan;
 TouchOverlayController touchMan;
 VideoManager* videoMan;
 JSONManager* JsonMan;
+RenderManager* renderMan;
 
 //------Functions used to create the Windows' threads loops------//
 void communicationLoop(void *);
 void videoLoop(void *);
 void JSONLoop(void *);
+void renderLoop(void *);
 
 /*
  * Method Overview: Program main
@@ -63,6 +66,8 @@ int main(int argc, char *argv[])
 
 	JsonMan = new JSONManager(communicationMan, commander);
 
+	renderMan = new RenderManager();
+
 	GUIMan = new GUIManager(resolutionX,resolutionY,commander,JsonMan);
 
 	//TouchController Init
@@ -72,6 +77,9 @@ int main(int argc, char *argv[])
 		getchar();
 		return 0;
 	}
+
+	//RenderManager Thread Init
+	_beginthread(renderLoop, 0, (void*)12);
 
 	//CommunicationManager Thread Init
 	_beginthread( communicationLoop, 0, (void*)12);
@@ -91,6 +99,15 @@ int main(int argc, char *argv[])
 	
 	return 0;
 }
+
+
+
+void renderLoop(void * arg) {
+	renderMan->initRendering();
+}
+
+
+
 
 /*
  * Method Overview: Infinite loop for the communication process
