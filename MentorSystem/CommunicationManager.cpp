@@ -18,6 +18,7 @@
 
 //Include its header file
 #include "CommunicationManager.h"
+#include <iostream>
 
 //---------------------------Variables---------------------------//
 unsigned int CommunicationManager::video_client_id;
@@ -137,6 +138,7 @@ int CommunicationManager::sendActionPackets(const char * message, int networkTyp
  */
 int CommunicationManager::startReception(ServerNetwork* network, char * recvbuf, int bufSize)
 {
+
 	int data_length=0;
 	int i;
 
@@ -159,8 +161,9 @@ int CommunicationManager::startReception(ServerNetwork* network, char * recvbuf,
 			//Update the data received counter with its lenght
 			i += data_length;
 		}
+
 	}
-	return data_length;
+	return i;
 }
 
 /*

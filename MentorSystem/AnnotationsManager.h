@@ -51,9 +51,6 @@ void bressenham(int Xin, int Yin, int Xfin, int Yfin, int Xorg, int Yorg, int co
 //Checks if a line crosses the X axis
 int crossingLine(long double Xin, long double Yin,long double Xfin, long double Yfin, int* wasException);
 
-//Clean the buffer, allowing lines to not be permanently drawn 
-void cleanBuffer();
-
 //Geometrical transformation: translate
 void translate(long double transX, long double transY);
 
@@ -68,7 +65,7 @@ void pointRotation(long double X, long double Y, long double transX,long double 
 				   long double origX, long double origY, long double* rotated_values);
 
 //Calls all the necessary methods for line drawing
-void drawLines();
+void openGLDrawLines();
 
 //Edit the frambuffer with keyboard events
 void keyboard(unsigned char key, int x, int y);
@@ -96,9 +93,6 @@ void startJSONLineUpdate();
 
 //Edit the frambuffer with touch events
 void OpenGLtouchControls(int command, int id, long double x, long double y);
-
-//Assings an image matrix to be the background image of the window
-void setOpenCVImage(cv::Mat image);
 
 //Returns recently added line
 char* OpenGLgetNewLine(int id);

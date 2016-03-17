@@ -21,10 +21,10 @@
 
 //--------------------------Definitions--------------------------//
 #define ZERO 0.000001
-#define ANNOTATION_RED 0.97
-#define ANNOTATION_GREEN 1.0
-#define ANNOTATION_BLUE 0.0
 #define PI 3.14159265358979323846
+
+float ANNOTATION_COLOR_UNSELECTED_RGB[3] = { 0.97f, 1.0f, 0.0f };
+float ANNOTATION_COLOR_SELECTED_RGB[3] = { 0.97f, 0.0f, 0.0f };
 
 //Define a RGB struct to have in position of the framebuffer
 typedef struct {
@@ -56,7 +56,7 @@ vector<int> selected_lines_id;
 LineAnnotation* temp_line=NULL;
 
 //Framebuffer. It has the RGB values of the whole shown window
-COLOR **buffer;
+//COLOR **buffer;
 
 //Clipping Manager instance
 LiangBarsky* my_clip_window;
@@ -86,147 +86,6 @@ void addPoint(int id,long double x, long double y)
 	 * touch event is received
 	 */
     lines.insert(pair<int, LineAnnotation*>(id, temp_line));
-}
-
-/*
- * Method Overview: Changes the color of a pixel in the framebuffer
- * Parameters: Pixel X and Y coordinates
- * Return: None
- */
-void plot(int posX, int posY, int selected_state)
-{
-	//Multiple assignments are done to create a thicker line
-	if(posX-1 > ZERO)
-	{
-		buffer[posX-1][posY].r = ANNOTATION_RED;
-		if(!selected_state)
-		{
-			buffer[posX-1][posY].g = ANNOTATION_GREEN;
-		}
-		else
-		{
-			buffer[posX-1][posY].g = ANNOTATION_BLUE;
-		}
-		buffer[posX-1][posY].b = ANNOTATION_BLUE;
-	}
-
-	if(posY-1 > ZERO)
-	{
-		buffer[posX][posY-1].r = ANNOTATION_RED;
-		if(!selected_state)
-		{
-			buffer[posX][posY-1].g = ANNOTATION_GREEN;
-		}
-		else
-		{
-			buffer[posX][posY-1].g = ANNOTATION_BLUE;
-		}
-		buffer[posX][posY-1].b = ANNOTATION_BLUE;
-	}
-
-	buffer[posX][posY].r = ANNOTATION_RED;
-	if(!selected_state)
-	{
-		buffer[posX][posY].g = ANNOTATION_GREEN;
-	}
-	else
-	{
-		buffer[posX][posY].g = ANNOTATION_BLUE;
-	}
-	buffer[posX][posY].b = ANNOTATION_BLUE;
-	
-	if(posX+1 < resolutionX)
-	{
-		buffer[posX+1][posY].r = ANNOTATION_RED;
-		if(!selected_state)
-		{
-			buffer[posX+1][posY].g = ANNOTATION_GREEN;
-		}
-		else
-		{
-			buffer[posX+1][posY].g = ANNOTATION_BLUE;
-		}
-		buffer[posX+1][posY].b = ANNOTATION_BLUE;
-	}
-
-	if(posY+1 < resolutionY)
-	{
-		buffer[posX][posY+1].r = ANNOTATION_RED;
-		if(!selected_state)
-		{
-			buffer[posX][posY+1].g = ANNOTATION_GREEN;
-		}
-		else
-		{
-			buffer[posX][posY+1].g = ANNOTATION_BLUE;
-		}
-		buffer[posX][posY+1].b = ANNOTATION_BLUE;
-	}
-
-}
-
-/*
- * Method Overview: Bressenham Line Drawing Algorithm
- * Parameters (1): (X,Y) initial and final coordinates of the line
- * Parameters (2): (X,Y) original coordinates before being mapped
- * Parameters (3): the int array indicates how mapping was done 
- * Parameters (4): whereas or not the line is currently selected
- * Return: None
- */
-void bressenham(int Xin, int Yin, int Xfin, int Yfin, int Xorg, int Yorg, int controls[], int selected_state)
-{
-	//Array to store demapped values
-	int demap[2];
-
-	//Variables used by the algorithm
-	int delta_E, delta_NE, d, Xp, Yp;
-
-	//Calculates the initial step (see Bresseham theory)
-	delta_E = 2*(Yfin-Yin);
-	delta_NE = 2*((Yfin-Yin)-(Xfin-Xin));
-
-	//Assigns the initial points as the first value
-	Xp = Xin; Yp = Yin;
-
-	//Gets the values need to be demapped
-	demap[0] = (int)Xp;
-    demap[1] = (int)Yp;
-
-	//Demaps the values obtained
-    MapManager->demapping(demap,controls,Xorg,Yorg);
-
-	//Change the color of pixels in this position to draw line
-	plot(demap[0],demap[1],selected_state);
-
-	//Calculates the next delta (see Bresseham theory)
-	d = 2*(Yfin-Yin)-(Xfin-Xin);
-
-	//Iterates while the current point is not the last point
-	while (Xp < Xfin)
-	{
-		//draw E (see Bresseham theory)
-		if (d <= 0)
-		{
-			Xp++;
-			d += delta_E;
-		}
-		//draw NE (see Bresseham theory)
-		else
-		{
-			Xp++; Yp++;
-			d += delta_NE;
-		}	
-
-		//Gets the values need to be demapped
-		demap[0] = Xp;
-		demap[1] = Yp;
-
-		//Demaps the values obtained
-		MapManager->demapping(demap,controls,Xorg,Yorg);
-
-		//Change the color of pixels in this position to draw line
-		plot(demap[0],demap[1],selected_state);
-	}
 }
 
 /*
@@ -283,41 +142,6 @@ int crossingLine(long double Xin, long double Yin,long double Xfin, long double 
 	}
 	
 	return cross;
-}
-
-/*
- * Method Overview: Cleans the buffer show just the right lines
- * Parameters: None
- * Return: None
- */
-void cleanBuffer()
-{
-	int i, j;
-
-	//Loops through the scene
-	for (i = 0; i < resolutionX; i++) 
-	{
-		for (j = 0; j < resolutionY; j++) 
-		{
-			//Assings the color of the closest pixel
-			int annotation_green = (buffer[i][j].g == ANNOTATION_GREEN || buffer[i][j].g == ANNOTATION_BLUE);
-			if(buffer[i][j].r == ANNOTATION_RED && annotation_green && buffer[i][j].b == ANNOTATION_BLUE)
-			{
-				if(i-1 > ZERO)
-				{
-					buffer[i][j].r = buffer[i-1][j].r;
-					buffer[i][j].g = buffer[i-1][j].g;
-					buffer[i][j].b = buffer[i-1][j].b;
-				}
-				else
-				{
-					buffer[i][j].r = buffer[i+1][j].r;
-					buffer[i][j].g = buffer[i+1][j].g;
-					buffer[i][j].b = buffer[i+1][j].b;
-				}
-			}
-		}
-	}
 }
 
 /*
@@ -506,7 +330,7 @@ void pointRotation(long double X, long double Y, long double transX,long double 
  * Parameters: None
  * Return: None
  */
-void drawLines()
+void openGLDrawLines()
 {
 	int i;
 
@@ -523,39 +347,28 @@ void drawLines()
 		LineAnnotation* to_draw;
 		to_draw = iter->second;
 
+		glBegin(GL_LINE_STRIP);
+		glLineWidth(5.0f);
+
 		//Whereas this line is currently being selected
 		int to_draw_state = to_draw->getSelectedState();
 
-		//loops through the line
-		for (i = 0; i < (int)(to_draw->getPoints()->size())-2; i = i+2) 
-		{
-			//array with the mappings to apply to the line
-			//{mirroring, change +/- sign x,change +/- sign y}
-			int controls[3] = {0,0,0};
-
-			//fills the [xin,yin,xfin,yfin] array
-			numbers[0] = (int)roundl(to_draw->getPoints()->at(i));
-			numbers[1] = (int)roundl(to_draw->getPoints()->at(i+1));
-			numbers[2] = (int)roundl(to_draw->getPoints()->at(i+2));
-			numbers[3] = (int)roundl(to_draw->getPoints()->at(i+3));
-
-			//Liang-Barskey clipping algorithm evaluation
-			if (my_clip_window->clip_line(&numbers[0], &numbers[1], &numbers[2], &numbers[3]))
-			{
-				//Stores the (xin,yin) for demapping later on
-				int orgX = numbers[0];
-				int orgY = numbers[1];
-
-				//Identify the octant in which the line is
-				MapManager->octants(numbers,controls);
-
-				//Maps the point to the first 
-				MapManager->mapping(numbers,controls);
-
-				//Calls Bressenham line algorithm
-				bressenham(numbers[0], numbers[1], numbers[2], numbers[3], orgX, orgY, controls, to_draw_state);
-			}
+		if (to_draw_state) {
+			glColor3f(ANNOTATION_COLOR_SELECTED_RGB[0], ANNOTATION_COLOR_SELECTED_RGB[1], ANNOTATION_COLOR_SELECTED_RGB[2]);
 		}
+		else {
+			glColor3f(ANNOTATION_COLOR_UNSELECTED_RGB[0], ANNOTATION_COLOR_UNSELECTED_RGB[1], ANNOTATION_COLOR_UNSELECTED_RGB[2]);
+		}
+
+		//loops through the line
+		for (i = 0; i < to_draw->getPoints()->size() - 1; i += 2) {
+			float x = to_draw->getPoints()->at(i);
+			float y = to_draw->getPoints()->at(i+1);
+
+			glVertex2f(x, y);
+		}
+
+		glEnd();
 	}
 }
 
@@ -583,9 +396,7 @@ void keyboard(unsigned char key, int x, int y)
  * Return: None
  */
 void eraseSelectedLines()
-{
-	cleanBuffer();
-			
+{			
 	int counter;
 
 	//Loop through all the lines
@@ -608,7 +419,6 @@ void eraseSelectedLines()
 
 	selected_lines_id.clear();
 
-	drawLines();
 }
 
 /*
@@ -629,7 +439,6 @@ void deselectAllLines()
 
 	myCommander->setLineSelectedFlag(0);
 
-	drawLines();
 }
 
 /*
@@ -639,7 +448,6 @@ void deselectAllLines()
  */
 void clearAllLines()
 {
-	cleanBuffer();
 
 	selected_lines_id.clear();
 			
@@ -741,75 +549,56 @@ void OpenGLtouchControls(int command, int id, long double x, long double y)
 		//Rotations
 		//rotate counterclockwise
 		case ROTATE_CNTR_CLK:	
-			cleanBuffer();
 			rotate(2.0f);
-			drawLines();
 			break;
 
 		//rotate clockwise
 		case ROTATE_CLK:	
-			cleanBuffer();
 			rotate(-2.0f);
-			drawLines();
 			break;
 
 		//Zooms
 		//zoom in
 		case ZOOM_IN:
-			cleanBuffer();
 			zoom(1.2f);
-			drawLines();
 			break;
 
 		//zoom out
 		case ZOOM_OUT:
-			cleanBuffer();
 			zoom(0.8f);
-			drawLines();
 			break;
 
 		//Pans
 		//right pan
 		case TRANSLATE_RIGHT:
-			cleanBuffer();
 			translate(resolutionX/50.0f,0);
-			drawLines();
 			break;
 
 		//left pan
 		case TRANSLATE_LEFT:
-			cleanBuffer();
 			translate(-resolutionX/50.0f,0);
-			drawLines();
 			break;
 
 		//up pan
 		case TRANSLATE_UP:
-			cleanBuffer();
 			translate(0,resolutionY/50.0f);
-			drawLines();
 			break;
 
 		//down pan
 		case TRANSLATE_DOWN:
-			cleanBuffer();
 			translate(0,-resolutionY/50.0f);
-			drawLines();
 			break;
 
 		//add a point to the line
 		case ADD_POINT:
 			addPoint(id,x,y);
-			drawLines();
 			lines.erase(id);
 			break;
 
 		//add line to line map
 		case ADD_LINE:
-			cleanBuffer();
 			lines.insert(pair<int, LineAnnotation*>(id, temp_line));
 			createJSONLineMessage(CREATE_ANNOTATION_COMMAND, temp_line);
-			drawLines();
 			break;
 
 		//clear line to prevent wrong lines
@@ -847,7 +636,6 @@ void OpenGLtouchControls(int command, int id, long double x, long double y)
 				}
 				lines.insert(pair<int, LineAnnotation*>(id, temp_line));
 				createJSONLineMessage(CREATE_ANNOTATION_COMMAND, temp_line);
-				drawLines();
 			}
 			break;
 	}
@@ -868,13 +656,13 @@ GLuint _backgroundTextureId;
 // updates current opencv image to be used for background
 void updateBackgroundOpenCVImage(cv::Mat image) {
 	if (_readyToUpdateBackgroundImage) {
-		std::cout << "ready to update background image" << std::endl;
+		//std::cout << "ready to update background image" << std::endl;
 		image.copyTo(_currentBackgroundOpenCVImage);
 		_readyToUpdateBackgroundImage = false;
 		_hasReceivedBackgroundImage = true;
 	}
 	else {
-		std::cout << "not ready to update background image" << std::endl;
+		//std::cout << "not ready to update background image" << std::endl;
 	}
 }
 
@@ -896,24 +684,6 @@ void init_test_texture() {
 	int w = _currentBackgroundOpenCVImage.size().width;
 	int h = _currentBackgroundOpenCVImage.size().height;
 
-	/*
-	unsigned char* pointer = (unsigned char*)malloc(w * h * num_channels);
-
-	std::cout << "making data for test texture" << std::endl;
-	int index = 0;
-	for (int j = 0; j < h; j++) {
-		for (int i = 0; i < w; i++) {
-
-			pointer[index + 0] = (unsigned char)(i);
-			pointer[index + 1] = (unsigned char)(128);
-			pointer[index + 2] = (unsigned char)(j);
-
-			index += num_channels;
-		}
-	}
-	std::cout << "made data for test texture" << std::endl;
-	*/
-
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, _currentBackgroundOpenCVImage.data);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -929,42 +699,6 @@ void init_test_texture() {
 
 
 
-
-/*
- * Method Overview: Sets an image as the scene background
- * Parameters: Image to draw in background
- * Return: None
- */
-void setOpenCVImage(cv::Mat image)
-{
-	int i, j;
-
-	//Loops through the scene
-	for (i = 0; i < resolutionX; i++) 
-	{
-		for (j = 0; j < resolutionY; j++) 
-		{
-			//Retreives a single pixel from the image
-			cv::Vec3b vector = image.at<cv::Vec3b>(j,i);
-
-			//Calculates its RGB 0-1 equivalent from 0-255
-			double atr = vector[0]/255.0;
-			double atg = vector[1]/255.0;
-			double atb = vector[2]/255.0;
-
-			//Assings the color to the framebuffer in that position
-			int annotation_green = (buffer[i][j].g != ANNOTATION_GREEN && buffer[i][j].g != ANNOTATION_BLUE);
-			if(buffer[i][j].r != ANNOTATION_RED || annotation_green || buffer[i][j].b != ANNOTATION_BLUE)
-			{
-				buffer[i][j].b = atr;
-				buffer[i][j].g = atg;
-				buffer[i][j].r = atb;
-			}
-		}
-	}
-	//Redraw the lines in the scene
-	drawLines();
-}
 
 /*
  * Method Overview: Creates a char* of the most recently added line
@@ -1050,9 +784,6 @@ int pointInPolygon(vector<long double> roi_extremes)
 
 	if((int)selected_lines_id.size()>0)
 	{
-		//Redraw the lines
-		drawLines();
-
 		//Redraw the scene
 		glutPostRedisplay();
 
@@ -1089,46 +820,8 @@ void draw_scene()
 {
 	checkAndInterpretCommand();
 
+	// clear framebuffer with white
 	glClear(GL_COLOR_BUFFER_BIT);
-
-	static int last_x = 0;
-	int i, j;
-
-	//Loops through the image
-	for (i = 0; i < last_x; i++) 
-	{
-		for (j = 0; j < resolutionY; j++) 
-		{
-			//Creates an OpenGL color from the framebuffer color
-			glColor3f((GLfloat)buffer[i][j].r,(GLfloat)buffer[i][j].g,(GLfloat)buffer[i][j].b);
-
-			//Create a point in the scene of that specific color
-	        glBegin(GL_POINTS);
-	        glVertex2i(i,j);
-	        glEnd();
-		}
-	}
-	
-	//Loops through the image
-	for (i = last_x; i < resolutionX; i++) 
-	{
-		for (j = 0; j < resolutionY; j++) 
-		{
-			//Assign white color
-			buffer[i][j].r = 1.0;
-			buffer[i][j].g = 1.0;
-			buffer[i][j].b = 1.0;
-
-			//Creates an OpenGL color from the framebuffer color
-			glColor3f((GLfloat)buffer[i][j].r,(GLfloat)buffer[i][j].g,(GLfloat)buffer[i][j].b);
-
-			//Create a point in the scene of that specific color
-			glBegin(GL_POINTS);
-			glVertex2i(i,j);
-			glEnd();
-			last_x = i;
-		}
-	}
 
 
 	if (_hasReceivedBackgroundImage) {
@@ -1144,7 +837,7 @@ void draw_scene()
 			int w = _currentBackgroundOpenCVImage.size().width;
 			int h = _currentBackgroundOpenCVImage.size().height;
 
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, _currentBackgroundOpenCVImage.data);
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, GL_BGR, GL_UNSIGNED_BYTE, _currentBackgroundOpenCVImage.data);
 
 			_readyToUpdateBackgroundImage = true;
 		}
@@ -1154,24 +847,23 @@ void draw_scene()
 		// some testing about drawing polygons
 		glBegin(GL_QUADS);
 
-
 		glTexCoord2f(0.0, 0.0);
-		glVertex2f(100, 100);
+		glVertex2f(-0.5, -0.5);
 
 		glTexCoord2f(1.0, 0.0);
-		glVertex2f(200, 100);
+		glVertex2f(resolutionX + 0.5, -0.5);
 
 		glTexCoord2f(1.0, 1.0);
-		glVertex2f(200, 200);
+		glVertex2f(resolutionX + 0.5, resolutionY + 0.5);
 
 		glTexCoord2f(0.0, 1.0);
-		glVertex2f(100, 200);
+		glVertex2f(-0.5, resolutionY + 0.5);
 		glEnd();
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	
+	openGLDrawLines();
 
 
 
@@ -1212,27 +904,6 @@ void initWindow(int argc, char* argv[], int resX, int resY, CommandCenter* pComm
 	//Assigns the scene resolution
 	resolutionX = resX;
 	resolutionY = resY;
-
-	int i, j;
-
-	//Allocates memory for the framebuffer
-	buffer = (COLOR **)malloc(resolutionX * sizeof(COLOR*));
-	for (i = 0; i < resolutionX; i++) 
-	{
-		buffer[i] = (COLOR *)malloc(resolutionY * sizeof(COLOR));
-	}
-
-	//Loops through the image
-	for (i = 0; i < resolutionX; i++) 
-	{
-		for (j = 0; j < resolutionY; j++) 
-		{
-			//White initial background
-			buffer[i][j].r = 1.0;
-            buffer[i][j].g = 1.0;
-            buffer[i][j].b = 1.0;
-		}
-	}
 
 	//Coordinates of the clipping window
 	my_clip_window = new LiangBarsky(0, 0, resolutionX-1, resolutionY-1);

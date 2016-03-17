@@ -101,10 +101,10 @@ void VideoManager::initWindow()
 		QueryPerformanceCounter(&time_start_video_loop);
 		
 
-		
+		/*
 		LARGE_INTEGER time_start_receive_frame;
 		QueryPerformanceCounter(&time_start_receive_frame);
-
+		*/
 
 		//Remove the /**/ when using video streaming
 		//Comment with /**/ when using an image as the background
@@ -119,7 +119,7 @@ void VideoManager::initWindow()
 
 			// first, get the size of the packet (sent as a 4-byte int before the packet)
 			int numBytesReadForPacketSizeReceipt = myServer->receiveFromClients(sockData, BYTES_FOR_LENGTH_MESSAGE, VIDEO_NETWORK_CODE);
-			std::cout << "read in " << numBytesReadForPacketSizeReceipt << " bytes, telling us how many bytes the packet is" << std::endl;
+			//std::cout << "read in " << numBytesReadForPacketSizeReceipt << " bytes, telling us how many bytes the packet is" << std::endl;
 
 			if (numBytesReadForPacketSizeReceipt == BYTES_FOR_LENGTH_MESSAGE) {
 				int packetSizeInBytes = ((unsigned char)sockData[3] << 24) | ((unsigned char)sockData[2] << 16) | ((unsigned char)sockData[1] << 8) | ((unsigned char)sockData[0]); // assumes big-endian
@@ -137,7 +137,7 @@ void VideoManager::initWindow()
 					//std::cout << "received new frame? " << receivedNewFrame << std::endl;
 				}
 				else {
-					std::cout << "error: didn't read the right number of bytes for the packet" << std::endl;
+					std::cout << "error: didn't read the right number of bytes for the packet; read in " << numBytesReadForPacket << " instead of " << packetSizeInBytes << std::endl;
 				}
 			}
 			else {
@@ -162,13 +162,14 @@ void VideoManager::initWindow()
 			receivedNewFrame = true;
 		}
 
+		/*
 		LARGE_INTEGER time_end_receive_frame;
 		QueryPerformanceCounter(&time_end_receive_frame);
 		{
 			auto durationSeconds = ((time_end_receive_frame.QuadPart - time_start_receive_frame.QuadPart) / (double)freq.QuadPart);
 			std::cout << "receive_frame duration: " << durationSeconds << " sec" << std::endl;
 		}
-
+		*/
 
 
 
@@ -178,7 +179,7 @@ void VideoManager::initWindow()
 			LARGE_INTEGER time_start_manipulate_image;
 			QueryPerformanceCounter(&time_start_manipulate_image);
 
-			std::cout << "received new frame, dimensions are: " << img.size().width << ", " << img.size().height << std::endl;
+			//std::cout << "received new frame, dimensions are: " << img.size().width << ", " << img.size().height << std::endl;
 			///////////////////////////////////////////////////////////
 
 			/*
@@ -204,13 +205,14 @@ void VideoManager::initWindow()
 			//Resizes the image
 			resize(rotated(roi), show, size);
 
-
+			/*
 			LARGE_INTEGER time_end_manipulate_image;
 			QueryPerformanceCounter(&time_end_manipulate_image);
 			{
 				auto durationSeconds = ((time_end_manipulate_image.QuadPart - time_start_manipulate_image.QuadPart) / (double)freq.QuadPart);
 				std::cout << "manipulate image duration: " << durationSeconds << " sec" << std::endl;
 			}
+			*/
 		}
 		
 		
@@ -223,39 +225,46 @@ void VideoManager::initWindow()
 		{	
 			//OpenGL Call
 
-
+			/*
 			LARGE_INTEGER time_start_create_gui;
 			QueryPerformanceCounter(&time_start_create_gui);
+			*/
 
 			Mat backgroundWithGUI = GUIcreator->createGUI(show);
 
+			/*
 			LARGE_INTEGER time_end_create_gui;
 			QueryPerformanceCounter(&time_end_create_gui);
 			{
 				auto durationSeconds = ((time_end_create_gui.QuadPart - time_start_create_gui.QuadPart) / (double)freq.QuadPart);
 				std::cout << "create_gui duration: " << durationSeconds << " sec" << std::endl;
 			}
+			*/
 
-
+			/*
 			LARGE_INTEGER time_start_set_image;
 			QueryPerformanceCounter(&time_start_set_image);
+			*/
 
-			//setOpenCVImage(backgroundWithGUI);
 			updateBackgroundOpenCVImage(backgroundWithGUI);
 
+			/*
 			LARGE_INTEGER time_end_set_image;
 			QueryPerformanceCounter(&time_end_set_image);
 			{
 				auto durationSeconds = ((time_end_set_image.QuadPart - time_start_set_image.QuadPart) / (double)freq.QuadPart);
 				std::cout << "set_image duration: " << durationSeconds << " sec" << std::endl;
 			}
+			*/
 		}
-
+		
+		/*
 		QueryPerformanceCounter(&time_end_video_loop);
 		{
 			auto durationSeconds = ((time_end_video_loop.QuadPart - time_start_video_loop.QuadPart) / (double)freq.QuadPart);
 			std::cout << "video loop duration: " << durationSeconds << " sec" << std::endl;
 		}
+		*/
 
 	}
 
