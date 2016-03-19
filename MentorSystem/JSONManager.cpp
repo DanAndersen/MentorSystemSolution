@@ -88,7 +88,7 @@ void JSONManager::constructGeneralJSON()
  * Return: None
  */
 void JSONManager::createJSONable(int id, string command, vector<long double>* myPoints, int annotation_code, 
-		vector<double> annotation_information, vector<int> selected_annotation_id)
+		vector<double> annotation_information, int selected_annotation_id)
 {
 	JSONable to_add;
 
@@ -212,17 +212,13 @@ void JSONManager::constructVirtualAnnotationJSONMessage(int id, string command, 
  * Parameters: Command type, ID of the erased annotations
  * Return: None
  */
-void JSONManager::constructDeleteJSONMessage(string command, vector<int> selected_annotation_id)
+void JSONManager::constructDeleteJSONMessage(string command, int selected_annotation_id)
 {
 	Json::Value message;
 
 	message["command"] = command;
 
-	int counter;
-	for(counter = 0; counter<(int)selected_annotation_id.size();counter++)
-	{
-		message["id"].append(selected_annotation_id.at(counter));
-	}
+	message["id"] = selected_annotation_id;
 
 	//Writes JSON Value to a file
 	writeJSONonFile(message);
@@ -372,7 +368,7 @@ void JSONManager::JSONtoNetwork(string string_to_send)
 	//Comment with /**/ when using the tablet client
 	//Add or remove the /**/ right before and after the ////////
 	///////////////////////////////////////////////////////////////
-
+	/*
 	//Retrieves info about the message lenght
 	int int_message_lenght = strlen(message_to_send);
 	stringstream convert;
@@ -392,7 +388,7 @@ void JSONManager::JSONtoNetwork(string string_to_send)
 
 	//Sends the message lenght 
 	myCommunicationManager->sendActionPackets(char_message_lenght,JSON_NETWORK_CODE);
-
+	*/
 	///////////////////////////////////////////////////////////////
 
 	//Actually sends the message

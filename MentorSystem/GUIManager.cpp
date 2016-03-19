@@ -51,8 +51,7 @@ GUIManager::GUIManager(int resX, int resY, CommandCenter* pCommander, JSONManage
  */
 cv::Mat GUIManager::createGUI(cv::Mat showImage)
 {
-	std::cout << "createGUI" << std::endl;
-
+	
 	//Overlays the annotations panel tab
 	if(!(myCommander->getAnnotationPanelShownFlag()))
 	{
@@ -703,7 +702,7 @@ void GUIManager::createJSONVirtualAnnotationMessage(string command, VirtualAnnot
 	annotation_information.push_back((double)annotation->getZoomValue());
 
 	vector<long double> null_double_vector;
-	vector<int> null_int_vector;
+	int null_int = 0;
 	myJSON->createJSONable(annotation->getID(), command, &null_double_vector, annotation->getCode(),
-		annotation_information, null_int_vector);
+		annotation_information, null_int);
 }

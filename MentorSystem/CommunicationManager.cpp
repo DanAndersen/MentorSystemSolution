@@ -120,6 +120,10 @@ int CommunicationManager::receiveFromClients(char * recvbuf, int bufSize, int ne
  */
 int CommunicationManager::sendActionPackets(const char * message, int networkType)
 {
+	std::cout << "=== sendActionPackets ===" << std::endl;
+	std::cout << message << std::endl;
+	std::cout << "=========================" << std::endl;
+
     int iResult;
 
 	if(networkType == JSON_NETWORK_CODE)

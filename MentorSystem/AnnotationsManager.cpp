@@ -426,7 +426,14 @@ void eraseSelectedLines()
 
 	vector<long double> null_long_vector;
 	vector<double> null_double_vector;
-	myJSON->createJSONable(NULL, DELETE_ANNOTATION_COMMAND, &null_long_vector, NULL, null_double_vector, selected_lines_id);
+
+
+	for (counter = 0; counter < (int)selected_lines_id.size(); counter++)
+	{
+		myJSON->createJSONable(NULL, DELETE_ANNOTATION_COMMAND, &null_long_vector, NULL, null_double_vector, selected_lines_id.at(counter));
+	}
+
+	
 
 	selected_lines_id.clear();
 
@@ -523,9 +530,9 @@ void checkAndInterpretCommand()
  */
 void createJSONLineMessage(string command, LineAnnotation* annotation)
 {
-	vector<int> null_int_vector;
+	int null_int = 0;
 	vector<double> null_double_vector;
-	myJSON->createJSONable(annotation->getID(), command, annotation->getPoints(), NULL, null_double_vector, null_int_vector);
+	myJSON->createJSONable(annotation->getID(), command, annotation->getPoints(), NULL, null_double_vector, null_int);
 }
 
 /*
@@ -898,7 +905,7 @@ void refresh()
 }
 
 void motion(int x, int y) {
-	std::cout << "motion: (" << x << ", " << y << ")" << std::endl;
+	//std::cout << "motion: (" << x << ", " << y << ")" << std::endl;
 
 	TouchGesture tg;
 	tg.param_size = 2;
@@ -911,7 +918,7 @@ void motion(int x, int y) {
 }
 
 void mouse(int button, int state, int x, int y) {
-	std::cout << "mouse: (" << x << ", " << y << ")" << std::endl;
+	//std::cout << "mouse: (" << x << ", " << y << ")" << std::endl;
 
 	TouchGesture tg;
 	tg.param_size = 2;
@@ -921,7 +928,7 @@ void mouse(int button, int state, int x, int y) {
 	/* Show the button and the event on the mouse */
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
-		std::cout << "Mouse: Left button down" << std::endl;
+		//std::cout << "Mouse: Left button down" << std::endl;
 
 
 		tg.type = TG_TOUCH_START;
@@ -934,7 +941,7 @@ void mouse(int button, int state, int x, int y) {
 	}
 	else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
 	{
-		std::cout << "Mouse: Left button up" << std::endl;
+		//std::cout << "Mouse: Left button up" << std::endl;
 
 		tg.type = TG_CLICK;
 		TouchOverlayController::OnTG_Click(tg, NULL);

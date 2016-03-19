@@ -46,7 +46,7 @@ public:
 		vector<long double>* myPoints;
 		int annotation_code;
 		vector<double> annotation_information;
-		vector<int> selected_annotation_id;
+		int selected_annotation_id;
 	};
 
 	//-------------------------Methods---------------------------//
@@ -57,7 +57,7 @@ public:
 
 	//create a object that will be transformed to a JSON later on
 	void createJSONable(int id, string command, vector<long double>* myPoints, int annotation_code, 
-		vector<double> annotation_information, vector<int> selected_annotation_id);		
+		vector<double> annotation_information, int selected_annotation_id);
 
 	//------------------------Variables--------------------------//
 	//None
@@ -74,7 +74,7 @@ private:
 	void constructVirtualAnnotationJSONMessage(int id, string command, int annotation_code, vector<double> annotation_information);
 
 	//Prepares a Json Value of a delete command
-	void constructDeleteJSONMessage(string command, vector<int> selected_annotation_id);
+	void constructDeleteJSONMessage(string command, int selected_annotation_id);
 
 	//Writes a created JSON Value to a file
 	void JSONManager::writeJSONonFile(Json::Value to_text);
