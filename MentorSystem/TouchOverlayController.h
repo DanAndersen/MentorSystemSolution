@@ -1,3 +1,5 @@
+#pragma once
+
 ///////////////////////////////////////////////////////////////////
 /*
  * Mentor System Application
@@ -62,6 +64,72 @@ public:
 	//Instance of the GUIManager
 	static GUIManager* myGUI;
 	
+	//Method to handle the Touch Down event
+	static void OnTG_Down(const TouchGesture & tg, void * call_object);
+
+	//Method to handle the Touch Move event
+	//static void OnTG_Move(const TouchGesture & tg,void * call_object);
+
+	//Method to handle the Touch Up event
+	//static void OnTG_Up(const TouchGesture & tg,void * call_object);
+
+	//Method to handle the Second Down event
+	//static void OnTG_SecondDown(const TouchGesture & tg,void * call_object);
+
+	//Method to handle the Second Up event
+	//static void OnTG_SecondUp(const TouchGesture & tg,void * call_object);
+
+	//Method to handle the Click event
+	static void OnTG_Click(const TouchGesture & tg, void * call_object);
+
+	//Method to handle the Move Right event
+	static void OnTG_MoveRight(const TouchGesture & tg, void * call_object);
+
+	//Method to handle the Move Left event
+	static void OnTG_MoveLeft(const TouchGesture & tg, void * call_object);
+
+	//Method to handle the Move Down event
+	static void OnTG_MoveDown(const TouchGesture & tg, void * call_object);
+
+	//Method to handle the Move Up event
+	static void OnTG_MoveUp(const TouchGesture & tg, void * call_object);
+
+	//Method to handle the Touch End event
+	static void OnTG_TouchEnd(const TouchGesture & tg, void * call_object);
+
+	//Method to handle the Rotate Clockwise event
+	static void OnTG_RotateClock(const TouchGesture & tg, void * call_object);
+
+	//Method to handle the Rotate CounterClockwise event
+	static void OnTG_RotateAntiClock(const TouchGesture & tg, void * call_object);
+
+	//Method to handle the Split Start event
+	//static void OnTG_SplitStart(const TouchGesture & tg,void * call_object);
+
+	//Method to handle the Split Apart event
+	static void OnTG_SplitApart(const TouchGesture & tg, void * call_object);
+
+	//Method to handle the Split Close event
+	static void OnTG_SplitClose(const TouchGesture & tg, void * call_object);
+
+	//Method to handle the Split End event
+	//static void OnTG_SplitEnd(const TouchGesture & tg,void * call_object);
+
+	//Method to handle the Parrell Move Up event
+	static void onTG_NearParrellMoveUp(const TouchGesture & tg, void * call_object);
+
+	//Method to handle the Parrell Move Down event
+	static void onTG_NearParrellMoveDown(const TouchGesture & tg, void * call_object);
+
+	//Method to handle the Parrell Move Right event
+	static void onTG_NearParrellMoveRight(const TouchGesture & tg, void * call_object);
+
+	//Method to handle the Parrell Move Left event
+	static void onTG_NearParrellMoveLeft(const TouchGesture & tg, void * call_object);
+
+	//Method to handle the Touch Start event
+	static void OnTG_TouchStart(const TouchGesture & tg, void * call_object);
+
 private:
 
 	// if true, then don't actually use the multitouch system,
@@ -112,71 +180,11 @@ private:
 	//Metthod to handle a default touch gesture event
 	//static void DefaultOnTG(const TouchGesture & tg,void * call_object);
 
-	//Method to handle the Touch Start event
-	static void OnTG_TouchStart(const TouchGesture & tg,void * call_object);
+	
 
-	//Method to handle the Touch Down event
-	static void OnTG_Down(const TouchGesture & tg,void * call_object);
+	
 
-	//Method to handle the Touch Move event
-	//static void OnTG_Move(const TouchGesture & tg,void * call_object);
-
-	//Method to handle the Touch Up event
-	//static void OnTG_Up(const TouchGesture & tg,void * call_object);
-		
-	//Method to handle the Second Down event
-	//static void OnTG_SecondDown(const TouchGesture & tg,void * call_object);
-
-	//Method to handle the Second Up event
-	//static void OnTG_SecondUp(const TouchGesture & tg,void * call_object);
-
-	//Method to handle the Click event
-	static void OnTG_Click(const TouchGesture & tg,void * call_object);
-
-	//Method to handle the Move Right event
-	static void OnTG_MoveRight(const TouchGesture & tg,void * call_object);
-
-	//Method to handle the Move Left event
-	static void OnTG_MoveLeft(const TouchGesture & tg,void * call_object);
-
-	//Method to handle the Move Down event
-	static void OnTG_MoveDown(const TouchGesture & tg,void * call_object);
-
-	//Method to handle the Move Up event
-	static void OnTG_MoveUp(const TouchGesture & tg,void * call_object);
-
-	//Method to handle the Touch End event
-	static void OnTG_TouchEnd(const TouchGesture & tg,void * call_object);
-
-	//Method to handle the Rotate Clockwise event
-	static void OnTG_RotateClock(const TouchGesture & tg,void * call_object);
-
-	//Method to handle the Rotate CounterClockwise event
-	static void OnTG_RotateAntiClock(const TouchGesture & tg,void * call_object);
-
-	//Method to handle the Split Start event
-	//static void OnTG_SplitStart(const TouchGesture & tg,void * call_object);
-
-	//Method to handle the Split Apart event
-	static void OnTG_SplitApart(const TouchGesture & tg,void * call_object);
-
-	//Method to handle the Split Close event
-	static void OnTG_SplitClose(const TouchGesture & tg,void * call_object);
-
-	//Method to handle the Split End event
-	//static void OnTG_SplitEnd(const TouchGesture & tg,void * call_object);
-
-	//Method to handle the Parrell Move Up event
-	static void onTG_NearParrellMoveUp(const TouchGesture & tg,void * call_object);
-
-	//Method to handle the Parrell Move Down event
-	static void onTG_NearParrellMoveDown(const TouchGesture & tg,void * call_object);
-
-	//Method to handle the Parrell Move Right event
-	static void onTG_NearParrellMoveRight(const TouchGesture & tg,void * call_object);
-
-	//Method to handle the Parrell Move Left event
-	static void onTG_NearParrellMoveLeft(const TouchGesture & tg,void * call_object);
+	
 
 	//------------------------Variables--------------------------//
 	//min-max values of the touched drawn region (if any)
@@ -192,6 +200,9 @@ private:
 	PFuncOnTouchGesture m_pf_on_tges[TG_TOUCH_END + 1];
 
 	static unsigned short last_type;
+
+
+	static void OnMove(long double x, long double y);
 
 };// sample code end
 

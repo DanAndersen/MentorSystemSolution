@@ -1,3 +1,5 @@
+#pragma once
+
 ///////////////////////////////////////////////////////////////////
 /*
  * Mentor System Application
@@ -34,8 +36,13 @@
 #include "touchCommands.h"//Touch events standard commands
 #include "annotationCommands.h"//Annotation-related commands
 #include "JSONDefinitions.h"////General JSON definitions
+#include "PQMTClient.h"//PQLabs Libraries
+#include "TouchOverlayController.h"
 
 using namespace std;//Standard Library
+
+//PQLabs SDK Libraries
+using namespace PQ_SDK_MultiTouch;
 
 //--------------------------Functions----------------------------//
 

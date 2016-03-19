@@ -19,6 +19,7 @@
 //Include its header file
 #include "AnnotationsManager.h"
 
+
 //--------------------------Definitions--------------------------//
 #define ZERO 0.000001
 #define PI 3.14159265358979323846
@@ -886,6 +887,69 @@ void refresh()
 	glutPostRedisplay();
 }
 
+void motion(int x, int y) {
+	std::cout << "motion: (" << x << ", " << y << ")" << std::endl;
+
+	TouchGesture tg;
+	tg.param_size = 2;
+	tg.params[0] = x;
+	tg.params[1] = y;
+
+	tg.type = TG_MOVE_LEFT;	// TODO, don't need to say left, but any direction should do
+
+	TouchOverlayController::OnTG_MoveLeft(tg, NULL);
+}
+
+void mouse(int button, int state, int x, int y) {
+	std::cout << "mouse: (" << x << ", " << y << ")" << std::endl;
+
+	TouchGesture tg;
+	tg.param_size = 2;
+	tg.params[0] = x;
+	tg.params[1] = y;
+
+	/* Show the button and the event on the mouse */
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+	{
+		std::cout << "Mouse: Left button down" << std::endl;
+
+
+		tg.type = TG_TOUCH_START;
+		TouchOverlayController::OnTG_TouchStart(tg, NULL);
+
+
+		tg.type = TG_DOWN;
+		TouchOverlayController::OnTG_Down(tg, NULL);
+		
+	}
+	else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
+	{
+		std::cout << "Mouse: Left button up" << std::endl;
+
+		tg.type = TG_CLICK;
+		TouchOverlayController::OnTG_Click(tg, NULL);
+
+		tg.type = TG_TOUCH_END;
+		TouchOverlayController::OnTG_TouchEnd(tg, NULL);
+	}
+	else if (button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN)
+	{
+		std::cout << "Mouse: Middle button down" << std::endl;
+	}
+	else if (button == GLUT_MIDDLE_BUTTON && state == GLUT_UP)
+	{
+		std::cout << "Mouse: Middle button up" << std::endl;
+	}
+	else if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+	{
+		std::cout << "Mouse: Right button down" << std::endl;
+	}
+	else if (button == GLUT_RIGHT_BUTTON && state == GLUT_UP)
+	{
+		std::cout << "Mouse: Right button up" << std::endl;
+	}
+}
+
 /*
  * Method Overview: Creates the OpenGL scene and context
  * Parameters (1): Main values, scene-to-create resolution
@@ -920,6 +984,8 @@ void initWindow(int argc, char* argv[], int resX, int resY, CommandCenter* pComm
 	glutIdleFunc(refresh);
 	glutDisplayFunc(draw_scene);
 	glutKeyboardFunc(keyboard);
+	glutMouseFunc(mouse);
+	glutMotionFunc(motion);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	gluOrtho2D(-0.5, resolutionX +0.5, -0.5, resolutionY + 0.5);
 	glutMainLoop();

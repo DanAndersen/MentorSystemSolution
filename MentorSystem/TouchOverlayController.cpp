@@ -402,9 +402,14 @@ void TouchOverlayController:: OnTG_Down(const TouchGesture & tg,void * call_obje
  */
 void TouchOverlayController:: OnTG_Click(const TouchGesture & tg,void * call_object)
 {
+
+	std::cout << "OnTG_Click" << std::endl;
+
 	assert(tg.type == TG_CLICK);
 
 	int button_clicked = myGUI->clickAnalysis(tg.params[0],tg.params[1]);
+
+	std::cout << "button_clicked: " << button_clicked << std::endl;
 
 	if(!button_clicked)
 	{
@@ -468,6 +473,26 @@ void TouchOverlayController:: OnTG_Click(const TouchGesture & tg,void * call_obj
 	last_type = tg.type;
 }
 
+
+
+void TouchOverlayController::OnMove(long double x, long double y) {
+	if (myCommander->getLinesDrawableFlag())
+	{
+		myCommander->setLineDrawnFlag(1);
+		OpenGLtouchControls(ADD_POINT, annotationCounter, x, y);
+	}
+	else
+	{
+		myCommander->setRoiDrawnFlag(1);
+		roi_extremes.push_back(x);
+		roi_extremes.push_back(y);
+	}
+}
+
+
+
+
+
 /*
  * Method Overview: Handles the received move_right events
  * Parameters: Received touch gesture
@@ -476,20 +501,13 @@ void TouchOverlayController:: OnTG_Click(const TouchGesture & tg,void * call_obj
 void TouchOverlayController:: OnTG_MoveRight(const TouchGesture & tg,void * call_object)
 {
 	assert(tg.type == TG_MOVE_RIGHT);
-	if(myCommander->getLinesDrawableFlag())
-	{
-		myCommander->setLineDrawnFlag(1);
-		OpenGLtouchControls(ADD_POINT,annotationCounter,(long double)tg.params[0],(long double)tg.params[1]);
-	}
-	else
-	{
-		myCommander->setRoiDrawnFlag(1);
-		roi_extremes.push_back((long double)tg.params[0]);
-		roi_extremes.push_back((long double)tg.params[1]);
-	}
-
+	OnMove((long double)tg.params[0], (long double)tg.params[1]);
 	last_type = tg.type;
 }
+
+
+
+
 
 /*
  * Method Overview: Handles the received move_left events
@@ -499,18 +517,7 @@ void TouchOverlayController:: OnTG_MoveRight(const TouchGesture & tg,void * call
 void TouchOverlayController:: OnTG_MoveLeft(const TouchGesture & tg,void * call_object)
 {
 	assert(tg.type == TG_MOVE_LEFT);
-	if(myCommander->getLinesDrawableFlag())
-	{
-		myCommander->setLineDrawnFlag(1);
-		OpenGLtouchControls(ADD_POINT,annotationCounter,(long double)tg.params[0],(long double)tg.params[1]);
-	}
-	else
-	{
-		myCommander->setRoiDrawnFlag(1);
-		roi_extremes.push_back((long double)tg.params[0]);
-		roi_extremes.push_back((long double)tg.params[1]);
-	}
-
+	OnMove((long double)tg.params[0], (long double)tg.params[1]);
 	last_type = tg.type;
 }
 
@@ -522,18 +529,7 @@ void TouchOverlayController:: OnTG_MoveLeft(const TouchGesture & tg,void * call_
 void TouchOverlayController:: OnTG_MoveDown(const TouchGesture & tg,void * call_object)
 {
 	assert(tg.type == TG_MOVE_DOWN);
-	if(myCommander->getLinesDrawableFlag())
-	{
-		myCommander->setLineDrawnFlag(1);
-		OpenGLtouchControls(ADD_POINT,annotationCounter,(long double)tg.params[0],(long double)tg.params[1]);
-	}
-	else
-	{
-		myCommander->setRoiDrawnFlag(1);
-		roi_extremes.push_back((long double)tg.params[0]);
-		roi_extremes.push_back((long double)tg.params[1]);
-	}
-
+	OnMove((long double)tg.params[0], (long double)tg.params[1]);
 	last_type = tg.type;
 }
 
@@ -545,18 +541,7 @@ void TouchOverlayController:: OnTG_MoveDown(const TouchGesture & tg,void * call_
 void TouchOverlayController:: OnTG_MoveUp(const TouchGesture & tg,void * call_object)
 {
 	assert(tg.type == TG_MOVE_UP);
-	if(myCommander->getLinesDrawableFlag())
-	{
-		myCommander->setLineDrawnFlag(1);
-		OpenGLtouchControls(ADD_POINT,annotationCounter,(long double)tg.params[0],(long double)tg.params[1]);
-	}
-	else
-	{
-		myCommander->setRoiDrawnFlag(1);
-		roi_extremes.push_back((long double)tg.params[0]);
-		roi_extremes.push_back((long double)tg.params[1]);
-	}
-
+	OnMove((long double)tg.params[0], (long double)tg.params[1]);
 	last_type = tg.type;
 }
 

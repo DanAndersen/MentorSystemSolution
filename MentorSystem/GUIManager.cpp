@@ -51,6 +51,8 @@ GUIManager::GUIManager(int resX, int resY, CommandCenter* pCommander, JSONManage
  */
 cv::Mat GUIManager::createGUI(cv::Mat showImage)
 {
+	std::cout << "createGUI" << std::endl;
+
 	//Overlays the annotations panel tab
 	if(!(myCommander->getAnnotationPanelShownFlag()))
 	{
@@ -101,6 +103,9 @@ cv::Mat GUIManager::createGUI(cv::Mat showImage)
 		resolutionY-BUTTON_SIZE));
 	
 	finalResult = overlayAnnotations(tempResult);
+
+
+	//cv::circle(finalResult, cv::Point(100, 100), 10, cv::Scalar(255, 255, 255));
 
 	return finalResult;
 }
