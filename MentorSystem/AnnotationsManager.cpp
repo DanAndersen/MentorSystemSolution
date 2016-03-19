@@ -341,6 +341,10 @@ void openGLDrawLines()
 	//Iterator to go through the map
     std::map<int, LineAnnotation*>::iterator iter;
 	
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+
+	
 	//loops to get each line
     for (iter = lines.begin(); iter != lines.end(); iter++)
     {
@@ -348,18 +352,20 @@ void openGLDrawLines()
 		LineAnnotation* to_draw;
 		to_draw = iter->second;
 
-		glBegin(GL_LINE_STRIP);
-		glLineWidth(5.0f);
-
 		//Whereas this line is currently being selected
 		int to_draw_state = to_draw->getSelectedState();
 
+		
 		if (to_draw_state) {
 			glColor3f(ANNOTATION_COLOR_SELECTED_RGB[0], ANNOTATION_COLOR_SELECTED_RGB[1], ANNOTATION_COLOR_SELECTED_RGB[2]);
 		}
 		else {
 			glColor3f(ANNOTATION_COLOR_UNSELECTED_RGB[0], ANNOTATION_COLOR_UNSELECTED_RGB[1], ANNOTATION_COLOR_UNSELECTED_RGB[2]);
 		}
+		
+
+		glLineWidth(5.0f);
+		glBegin(GL_LINE_STRIP);
 
 		//loops through the line
 		for (i = 0; i < to_draw->getPoints()->size() - 1; i += 2) {
@@ -371,6 +377,10 @@ void openGLDrawLines()
 
 		glEnd();
 	}
+	
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
 }
 
 /*
@@ -844,7 +854,7 @@ void draw_scene()
 		}
 
 		
-
+		glColor3f(1.0, 1.0, 1.0);
 		// some testing about drawing polygons
 		glBegin(GL_QUADS);
 
