@@ -41,6 +41,8 @@ int resolutionX, resolutionY;
 //current Id of the line being drawn
 int currentID = -1;
 
+bool _usingMouseAndMotionCallbacks = false;
+
 //Command Center instance
 CommandCenter* myCommander;
 
@@ -397,6 +399,16 @@ void keyboard(unsigned char key, int x, int y)
 		case 'q': case 'Q':
 			glutLeaveMainLoop();
 			exit(0);
+			break;
+		case 'm': case 'M':
+			if (_usingMouseAndMotionCallbacks) {
+				std::cout << "disabling mouse/motion callbacks (using touchscreen instead)" << std::endl;
+				_usingMouseAndMotionCallbacks = false;
+			}
+			else {
+				std::cout << "enabling mouse/motion callbacks (don't use touchscreen while enabled)" << std::endl;
+				_usingMouseAndMotionCallbacks = true;
+			}
 			break;
 	}
 }
@@ -905,66 +917,71 @@ void refresh()
 }
 
 void motion(int x, int y) {
-	//std::cout << "motion: (" << x << ", " << y << ")" << std::endl;
+	if (_usingMouseAndMotionCallbacks) {
+		//std::cout << "motion: (" << x << ", " << y << ")" << std::endl;
 
-	TouchGesture tg;
-	tg.param_size = 2;
-	tg.params[0] = x;
-	tg.params[1] = y;
+		TouchGesture tg;
+		tg.param_size = 2;
+		tg.params[0] = x;
+		tg.params[1] = y;
 
-	tg.type = TG_MOVE_LEFT;	// TODO, don't need to say left, but any direction should do
+		tg.type = TG_MOVE_LEFT;	// TODO, don't need to say left, but any direction should do
 
-	TouchOverlayController::OnTG_MoveLeft(tg, NULL);
+		TouchOverlayController::OnTG_MoveLeft(tg, NULL);
+	}
 }
 
 void mouse(int button, int state, int x, int y) {
-	//std::cout << "mouse: (" << x << ", " << y << ")" << std::endl;
+	if (_usingMouseAndMotionCallbacks) {
+		//std::cout << "mouse: (" << x << ", " << y << ")" << std::endl;
 
-	TouchGesture tg;
-	tg.param_size = 2;
-	tg.params[0] = x;
-	tg.params[1] = y;
+		TouchGesture tg;
+		tg.param_size = 2;
+		tg.params[0] = x;
+		tg.params[1] = y;
 
-	/* Show the button and the event on the mouse */
-	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
-	{
-		//std::cout << "Mouse: Left button down" << std::endl;
-
-
-		tg.type = TG_TOUCH_START;
-		TouchOverlayController::OnTG_TouchStart(tg, NULL);
+		/* Show the button and the event on the mouse */
+		if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+		{
+			//std::cout << "Mouse: Left button down" << std::endl;
 
 
-		tg.type = TG_DOWN;
-		TouchOverlayController::OnTG_Down(tg, NULL);
-		
+			tg.type = TG_TOUCH_START;
+			TouchOverlayController::OnTG_TouchStart(tg, NULL);
+
+
+			tg.type = TG_DOWN;
+			TouchOverlayController::OnTG_Down(tg, NULL);
+
+		}
+		else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
+		{
+			//std::cout << "Mouse: Left button up" << std::endl;
+
+			tg.type = TG_CLICK;
+			TouchOverlayController::OnTG_Click(tg, NULL);
+
+			tg.type = TG_TOUCH_END;
+			TouchOverlayController::OnTG_TouchEnd(tg, NULL);
+		}
+		else if (button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN)
+		{
+			std::cout << "Mouse: Middle button down" << std::endl;
+		}
+		else if (button == GLUT_MIDDLE_BUTTON && state == GLUT_UP)
+		{
+			std::cout << "Mouse: Middle button up" << std::endl;
+		}
+		else if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+		{
+			std::cout << "Mouse: Right button down" << std::endl;
+		}
+		else if (button == GLUT_RIGHT_BUTTON && state == GLUT_UP)
+		{
+			std::cout << "Mouse: Right button up" << std::endl;
+		}
 	}
-	else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
-	{
-		//std::cout << "Mouse: Left button up" << std::endl;
-
-		tg.type = TG_CLICK;
-		TouchOverlayController::OnTG_Click(tg, NULL);
-
-		tg.type = TG_TOUCH_END;
-		TouchOverlayController::OnTG_TouchEnd(tg, NULL);
-	}
-	else if (button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN)
-	{
-		std::cout << "Mouse: Middle button down" << std::endl;
-	}
-	else if (button == GLUT_MIDDLE_BUTTON && state == GLUT_UP)
-	{
-		std::cout << "Mouse: Middle button up" << std::endl;
-	}
-	else if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
-	{
-		std::cout << "Mouse: Right button down" << std::endl;
-	}
-	else if (button == GLUT_RIGHT_BUTTON && state == GLUT_UP)
-	{
-		std::cout << "Mouse: Right button up" << std::endl;
-	}
+	
 }
 
 /*

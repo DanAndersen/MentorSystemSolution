@@ -22,3 +22,7 @@ This codebase has been set up to be (mostly) self-contained. Known working when 
 There is one additional piece that is needed -- adding OpenCV. Download OpenCV for Windows, version 2.4.9, and place the extracted "opencv" directory inside "MentorSystem\Libraries".
 
 Also, you need to copy over the DLLs in the "DLLs" folder to the directory where your compiled exe is (e.g. "Debug").
+
+# Keyboard controls
+
+m - enables/disables mouse controls for debugging. When enabled, you can use the mouse click for simple UI interactions, but it causes problems when you try to use the touchscreen while this is enabled.
