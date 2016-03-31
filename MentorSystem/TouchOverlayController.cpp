@@ -31,6 +31,8 @@ int TouchOverlayController::selected_annotation_code;
 vector<long double> TouchOverlayController::roi_extremes;
 unsigned short TouchOverlayController::last_type;
 
+bool TouchOverlayController::debugMessagesEnabled = false;
+
 /*
  * Method Overview: Constructor of the class
  * Parameters: None 
@@ -38,6 +40,9 @@ unsigned short TouchOverlayController::last_type;
  */
 TouchOverlayController::TouchOverlayController()
 {
+
+	TouchOverlayController::debugMessagesEnabled = false;
+
 	annotationCounter = 0;
 	roi_extremes.push_back(0.0);
 	memset(m_pf_on_tges,0, sizeof(m_pf_on_tges));
@@ -178,6 +183,9 @@ void TouchOverlayController::SetFuncsOnReceiveProc()
  */
 void TouchOverlayController:: OnReceivePointFrame(int frame_id, int time_stamp, int moving_point_count, const TouchPoint * moving_point_array, void * call_back_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnReceivePointFrame" << std::endl;
+	}
 	TouchOverlayController * controller = static_cast<TouchOverlayController*>(call_back_object);
 	assert(controller != NULL);
 	const char * tp_event[] = 
@@ -202,6 +210,10 @@ void TouchOverlayController:: OnReceivePointFrame(int frame_id, int time_stamp, 
  */
 void TouchOverlayController:: OnReceiveGesture(const TouchGesture & ges, void * call_back_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnReceiveGesture" << std::endl;
+	}
+
 	TouchOverlayController * controller = static_cast<TouchOverlayController*>(call_back_object);
 	assert(controller != NULL);
 	controller->OnTouchGesture(ges);
@@ -216,6 +228,10 @@ void TouchOverlayController:: OnReceiveGesture(const TouchGesture & ges, void * 
  */
 void TouchOverlayController:: OnServerBreak(void * param, void * call_back_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnServerBreak" << std::endl;
+	}
+
 	// when the server break, disconenct server;
 	cout << "server break, disconnect here" << endl;
 	DisconnectServer();
@@ -229,6 +245,10 @@ void TouchOverlayController:: OnServerBreak(void * param, void * call_back_objec
  */
 void TouchOverlayController::OnReceiveError(int err_code, void * call_back_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnReceiveError" << std::endl;
+	}
+
 	switch(err_code)
 	{
 	case PQMTE_RCV_INVALIDATE_DATA:
@@ -254,6 +274,10 @@ void TouchOverlayController::OnReceiveError(int err_code, void * call_back_objec
  */
 void TouchOverlayController:: OnGetServerResolution(int x, int y, void * call_back_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnGetServerResolution" << std::endl;
+	}
+
 	cout << " server resolution:" << x << "," << y << endl;
 }
 
@@ -265,6 +289,10 @@ void TouchOverlayController:: OnGetServerResolution(int x, int y, void * call_ba
  */
 void TouchOverlayController::OnGetDeviceInfo(const TouchDeviceInfo & deviceinfo,void *call_back_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnGetDeviceInfo" << std::endl;
+	}
+
 	cout << " touch screen, SerialNumber: " << deviceinfo.serial_number <<",(" << deviceinfo.screen_width << "," << deviceinfo.screen_height << ")."<<  endl;
 }
 
@@ -349,6 +377,10 @@ void TouchOverlayController::OnTG_SplitEnd(const TouchGesture & tg,void * call_o
  */
 void TouchOverlayController:: OnTG_TouchStart(const TouchGesture & tg,void * call_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnTG_TouchStart" << std::endl;
+	}
+
 	assert(tg.type == TG_TOUCH_START);
 
 	//if not in draw mode, clears the selected touch region
@@ -367,6 +399,10 @@ void TouchOverlayController:: OnTG_TouchStart(const TouchGesture & tg,void * cal
  */
 void TouchOverlayController:: OnTouchGesture(const TouchGesture & tg)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnTouchGesture" << std::endl;
+	}
+
 	if(TG_NO_ACTION == tg.type)
 		return ;
 	
@@ -385,6 +421,10 @@ void TouchOverlayController:: OnTouchGesture(const TouchGesture & tg)
  */
 void TouchOverlayController:: OnTG_Down(const TouchGesture & tg,void * call_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnTG_Down" << std::endl;
+	}
+
 	assert(tg.type == TG_DOWN && tg.param_size >= 2);
 	
 	if(myCommander->getLinesDrawableFlag())
@@ -402,6 +442,9 @@ void TouchOverlayController:: OnTG_Down(const TouchGesture & tg,void * call_obje
  */
 void TouchOverlayController:: OnTG_Click(const TouchGesture & tg,void * call_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnTG_Click" << std::endl;
+	}
 
 	std::cout << "OnTG_Click" << std::endl;
 
@@ -476,6 +519,11 @@ void TouchOverlayController:: OnTG_Click(const TouchGesture & tg,void * call_obj
 
 
 void TouchOverlayController::OnMove(long double x, long double y) {
+
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnMove" << std::endl;
+	}
+
 	if (myCommander->getLinesDrawableFlag())
 	{
 		myCommander->setLineDrawnFlag(1);
@@ -500,6 +548,10 @@ void TouchOverlayController::OnMove(long double x, long double y) {
  */
 void TouchOverlayController:: OnTG_MoveRight(const TouchGesture & tg,void * call_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnTG_MoveRight" << std::endl;
+	}
+
 	assert(tg.type == TG_MOVE_RIGHT);
 	OnMove((long double)tg.params[0], (long double)tg.params[1]);
 	last_type = tg.type;
@@ -516,6 +568,10 @@ void TouchOverlayController:: OnTG_MoveRight(const TouchGesture & tg,void * call
  */
 void TouchOverlayController:: OnTG_MoveLeft(const TouchGesture & tg,void * call_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnTG_MoveLeft" << std::endl;
+	}
+
 	assert(tg.type == TG_MOVE_LEFT);
 	OnMove((long double)tg.params[0], (long double)tg.params[1]);
 	last_type = tg.type;
@@ -528,6 +584,10 @@ void TouchOverlayController:: OnTG_MoveLeft(const TouchGesture & tg,void * call_
  */
 void TouchOverlayController:: OnTG_MoveDown(const TouchGesture & tg,void * call_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnTG_MoveDown" << std::endl;
+	}
+
 	assert(tg.type == TG_MOVE_DOWN);
 	OnMove((long double)tg.params[0], (long double)tg.params[1]);
 	last_type = tg.type;
@@ -540,6 +600,10 @@ void TouchOverlayController:: OnTG_MoveDown(const TouchGesture & tg,void * call_
  */
 void TouchOverlayController:: OnTG_MoveUp(const TouchGesture & tg,void * call_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnTG_MoveUp" << std::endl;
+	}
+
 	assert(tg.type == TG_MOVE_UP);
 	OnMove((long double)tg.params[0], (long double)tg.params[1]);
 	last_type = tg.type;
@@ -552,6 +616,10 @@ void TouchOverlayController:: OnTG_MoveUp(const TouchGesture & tg,void * call_ob
  */
 void TouchOverlayController:: OnTG_TouchEnd(const TouchGesture & tg,void * call_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnTG_TouchEnd" << std::endl;
+	}
+
 	assert(tg.type == TG_TOUCH_END);
 	
 	if(last_type == TG_ROTATE_CLOCK || last_type == TG_ROTATE_ANTICLOCK || last_type == TG_SPLIT_APART || 
@@ -605,6 +673,10 @@ void TouchOverlayController:: OnTG_TouchEnd(const TouchGesture & tg,void * call_
  */
 void TouchOverlayController::OnTG_RotateClock(const TouchGesture & tg,void * call_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnTG_RotateClock" << std::endl;
+	}
+
 	assert(tg.type == TG_ROTATE_CLOCK);
 	
 	if(myCommander->getVirtualAnnotationSelectedFlag())
@@ -626,6 +698,10 @@ void TouchOverlayController::OnTG_RotateClock(const TouchGesture & tg,void * cal
  */
 void TouchOverlayController::OnTG_RotateAntiClock(const TouchGesture & tg,void * call_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnTG_RotateAntiClock" << std::endl;
+	}
+
 	assert(tg.type == TG_ROTATE_ANTICLOCK);
 	
 	if(myCommander->getVirtualAnnotationSelectedFlag())
@@ -647,6 +723,10 @@ void TouchOverlayController::OnTG_RotateAntiClock(const TouchGesture & tg,void *
  */
 void TouchOverlayController::OnTG_SplitApart(const TouchGesture & tg,void * call_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnTG_SplitApart" << std::endl;
+	}
+
 	assert(tg.type == TG_SPLIT_APART && tg.param_size >= 1);
 	
 	if(myCommander->getVirtualAnnotationSelectedFlag())
@@ -668,6 +748,10 @@ void TouchOverlayController::OnTG_SplitApart(const TouchGesture & tg,void * call
  */
 void TouchOverlayController::OnTG_SplitClose(const TouchGesture & tg,void * call_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnTG_SplitClose" << std::endl;
+	}
+
 	assert(tg.type == TG_SPLIT_CLOSE && tg.param_size >= 1);
 	
 	if(myCommander->getVirtualAnnotationSelectedFlag())
@@ -689,6 +773,10 @@ void TouchOverlayController::OnTG_SplitClose(const TouchGesture & tg,void * call
  */
 void TouchOverlayController::onTG_NearParrellMoveRight(const TouchGesture & tg,void * call_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "onTG_NearParrellMoveRight" << std::endl;
+	}
+
 	assert(tg.type == TG_NEAR_PARREL_MOVE_RIGHT);
 	
 	if(myCommander->getVirtualAnnotationSelectedFlag())
@@ -710,6 +798,10 @@ void TouchOverlayController::onTG_NearParrellMoveRight(const TouchGesture & tg,v
  */
 void TouchOverlayController::onTG_NearParrellMoveLeft(const TouchGesture & tg,void * call_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "onTG_NearParrellMoveLeft" << std::endl;
+	}
+
 	assert(tg.type == TG_NEAR_PARREL_MOVE_LEFT);
 	
 	if(myCommander->getVirtualAnnotationSelectedFlag())
@@ -732,6 +824,10 @@ void TouchOverlayController::onTG_NearParrellMoveLeft(const TouchGesture & tg,vo
  */
 void TouchOverlayController::onTG_NearParrellMoveUp(const TouchGesture & tg,void * call_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "onTG_NearParrellMoveUp" << std::endl;
+	}
+
 	assert(tg.type == TG_NEAR_PARREL_MOVE_UP);
 
 	if(myCommander->getVirtualAnnotationSelectedFlag())
@@ -753,6 +849,10 @@ void TouchOverlayController::onTG_NearParrellMoveUp(const TouchGesture & tg,void
  */
 void TouchOverlayController::onTG_NearParrellMoveDown(const TouchGesture & tg,void * call_object)
 {
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "onTG_NearParrellMoveDown" << std::endl;
+	}
+
 	assert(tg.type == TG_NEAR_PARREL_MOVE_DOWN);
 	
 	if(myCommander->getVirtualAnnotationSelectedFlag())

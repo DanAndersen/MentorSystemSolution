@@ -58,6 +58,9 @@ public:
 	int Init(CommandCenter* pCommander, GUIManager* pGUI);
 
 	//------------------------Variables--------------------------//
+
+	static bool debugMessagesEnabled;
+
 	//Instance of the CommanderCenter
 	static CommandCenter* myCommander;
 
@@ -137,8 +140,6 @@ private:
 	bool _mockMode;
 
 	bool isInMockMode();
-
-
 
 	//-------------------------Methods---------------------------//
 		//----------------Call Back Methods------------------//

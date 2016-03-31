@@ -400,6 +400,16 @@ void keyboard(unsigned char key, int x, int y)
 			glutLeaveMainLoop();
 			exit(0);
 			break;
+		case 'd': case 'D':
+			if (TouchOverlayController::debugMessagesEnabled) {
+				std::cout << "disabling touch overlay debug messages" << std::endl;
+				TouchOverlayController::debugMessagesEnabled = false;
+			}
+			else {
+				std::cout << "enabling touch overlay debug messages" << std::endl;
+				TouchOverlayController::debugMessagesEnabled = true;
+			}
+			break;
 		case 'm': case 'M':
 			if (_usingMouseAndMotionCallbacks) {
 				std::cout << "disabling mouse/motion callbacks (using touchscreen instead)" << std::endl;
