@@ -29,6 +29,7 @@
 #include "TouchOverlayController.h"//PQLabs Overlay Controller
 #include "VideoManager.h"//OpenCV Video Manager
 #include <process.h>//Windows Threads
+#include "Config.h"
 
 using namespace std;//Standard Libraries
 
@@ -52,8 +53,8 @@ void JSONLoop(void *);
  */
 int main(int argc, char *argv[]) 
 {
-	int resolutionX = 1920;
-	int resolutionY = 1080;
+	int resolutionX = SCREEN_RESOLUTION_X;
+	int resolutionY = SCREEN_RESOLUTION_Y;
 
 	//init the CommandCenter
 	commander = new CommandCenter();

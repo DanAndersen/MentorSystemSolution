@@ -35,6 +35,7 @@
 #include "annotationCommands.h"//Annotation-related commands
 #include "JSONDefinitions.h"////General JSON definitions
 #include "virtualAnnotationDefinitions.h"//Virtual annotation codes
+#include <mutex>
 
 class GUIManager
 {
@@ -120,6 +121,7 @@ private:
 
 	//Stores all the lines that are going to be drawn by Bressenham
 	map<int, VirtualAnnotation*> annotationsTable;
+	std::mutex annotationsTableMutex;  // protects annotationsTable
 
 	//Stores the Ids of the annotations that are currently selected
 	vector<int> selected_annotations_id;

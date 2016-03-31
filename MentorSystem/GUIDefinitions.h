@@ -72,6 +72,18 @@
 #endif
 
 //--------------------General GUI Definitions--------------------//
+
+////
+// DON'T edit this X/Y unless you also change the GUI defined below. This is not the resolution to display things at.
+// This is the resolution assumed when defining the location of all the GUI elements.
+#ifndef GUI_MEASURED_RESOLUTION_X
+#define GUI_MEASURED_RESOLUTION_X 1920
+#endif
+#ifndef GUI_MEASURED_RESOLUTION_Y
+#define GUI_MEASURED_RESOLUTION_Y 1080
+#endif
+////
+
 //Zero X and Y coordinates of the screen
 #ifndef SCREEN_ORIGIN
 #define SCREEN_ORIGIN 0

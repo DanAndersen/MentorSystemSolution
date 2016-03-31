@@ -18,6 +18,8 @@
 
 //Include its header file
 #include "GUIManager.h"
+#include "Config.h"
+
 
 //--------------------------Definitions--------------------------//
 #define PI 3.14159265358979323846
@@ -118,6 +120,10 @@ int GUIManager::clickAnalysis(double posX, double posY)
 {
 	int clicked = 0;
 
+
+	
+
+
 	//Point Button Clicked
 	if(posX > POINT_BUTTON_MIN_X && posX < POINT_BUTTON_MAX_X && posY > POINT_BUTTON_MIN_Y && posY < POINT_BUTTON_MAX_Y)
 	{
@@ -212,7 +218,7 @@ int GUIManager::clickAnalysis(double posX, double posY)
  */
 int GUIManager::touchedAnnotationIdentification(double posX, double posY)
 {
-	int code;
+	int code = 0;
 
 	//Determines which row was clicked
 	if(posY>FIRST_ROW_UPPER_MARGIN && posY<FIRST_ROW_LOWER_MARGIN)
@@ -293,6 +299,8 @@ int GUIManager::checkAnnotationSelected(long double posX, long double posY)
 	//Iterator to go through the map
     std::map<int, VirtualAnnotation*>::iterator iter;
 	
+	std::lock_guard<std::mutex> annotationsTableLock(annotationsTableMutex);	// mutex is auto-released when lock goes out of scope
+
 	//Loops through all the lines
     for (iter = annotationsTable.begin(); iter != annotationsTable.end(); iter++)
     {
@@ -481,6 +489,8 @@ cv::Mat GUIManager::overlayAnnotations(cv::Mat GUIImage)
 	//Iterator to go through the map
     std::map<int, VirtualAnnotation*>::iterator iter;
 	
+	std::lock_guard<std::mutex> annotationsTableLock(annotationsTableMutex);	// mutex is auto-released when lock goes out of scope
+
 	//Loops through all the annotations
     for (iter = annotationsTable.begin(); iter != annotationsTable.end(); iter++)
     {
@@ -529,6 +539,8 @@ void GUIManager::deselectAllVirtualAnnotations()
 	//Iterator to go through the map
     std::map<int, VirtualAnnotation*>::iterator iter;
 	
+	std::lock_guard<std::mutex> annotationsTableLock(annotationsTableMutex);	// mutex is auto-released when lock goes out of scope
+
 	//Loops through all the lines
     for (iter = annotationsTable.begin(); iter != annotationsTable.end(); iter++)
     {
@@ -548,6 +560,8 @@ void GUIManager::deselectAllVirtualAnnotations()
 void GUIManager::eraseVirtualAnnotations()
 {
 	int counter;
+
+	std::lock_guard<std::mutex> annotationsTableLock(annotationsTableMutex);	// mutex is auto-released when lock goes out of scope
 
 	//Loop through all the lines
 	for (counter = 0; counter < (int)selected_annotations_id.size(); counter++) 

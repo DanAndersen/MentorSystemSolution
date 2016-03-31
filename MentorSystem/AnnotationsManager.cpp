@@ -18,6 +18,7 @@
 
 //Include its header file
 #include "AnnotationsManager.h"
+#include <mutex>
 
 
 //--------------------------Definitions--------------------------//
@@ -51,6 +52,7 @@ JSONManager* myJSON;
 
 //Stores all the lines that are going to be drawn by Bressenham
 map<int, LineAnnotation*> lines; 
+std::mutex linesMutex;  // protects lines
 
 //Stores the Ids of the line that are inside of a specific roi
 vector<int> selected_lines_id;
@@ -156,6 +158,8 @@ void translate(long double transX, long double transY)
 {
 	int i, j;
 
+	std::lock_guard<std::mutex> linesLock(linesMutex);
+
 	//Loop through all the lines
 	for (i = 0; i < (int)selected_lines_id.size(); i++) 
 	{
@@ -189,6 +193,8 @@ void zoom(long double scale)
 	
 	long double general_center_X = 0.0;
 	long double general_center_Y = 0.0;
+
+	std::lock_guard<std::mutex> linesLock(linesMutex);
 
 	//calculates the general center of a group of lines
 	for (i = 0; i < (int)selected_lines_id.size(); i++) 
@@ -248,6 +254,8 @@ void rotate(long double degree)
 	long double general_center_Y = 0.0;
 
 	long double rotated_values[2];
+
+	std::lock_guard<std::mutex> linesLock(linesMutex);
 
 	//calculates the general center of a group of lines
 	for (i = 0; i < (int)selected_lines_id.size(); i++) 
@@ -346,7 +354,8 @@ void openGLDrawLines()
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 
-	
+	std::lock_guard<std::mutex> linesLock(linesMutex);
+
 	//loops to get each line
     for (iter = lines.begin(); iter != lines.end(); iter++)
     {
@@ -432,11 +441,14 @@ void eraseSelectedLines()
 {			
 	int counter;
 
+	std::lock_guard<std::mutex> linesLock(linesMutex);
+
 	//Loop through all the lines
 	for (counter = 0; counter < (int)selected_lines_id.size(); counter++) 
 	{
 		lines.erase(selected_lines_id.at(counter));
 	}
+	
 
 	//Gets the virtual annotation's selected IDs
 	vector<int> selected = myCommander->getSelectedIDs();
@@ -470,9 +482,19 @@ void deselectAllLines()
 {
 	int counter;
 
-	for(counter = 0; counter<(int)(selected_lines_id.size());counter++)
+	std::lock_guard<std::mutex> linesLock(linesMutex);
+
+	for(counter = 0; counter< selected_lines_id.size();counter++)
 	{
-		(lines.find(selected_lines_id.at(counter))->second)->setSelectedState(0);
+		auto selectedLineId = selected_lines_id.at(counter);
+		
+		auto foundLine = lines.find(selectedLineId);
+		if (foundLine != lines.end()) {
+			auto selectedLine = foundLine->second;
+			if (selectedLine != NULL) {
+				selectedLine->setSelectedState(0);
+			}
+		}
 	}
 
 	selected_lines_id.clear();
@@ -565,6 +587,8 @@ void createJSONLineMessage(string command, LineAnnotation* annotation)
 void startJSONLineUpdate()
 {
 	int i;
+
+	std::lock_guard<std::mutex> linesLock(linesMutex);
 
 	//Loop through all the lines
 	for (i = 0; i < (int)selected_lines_id.size(); i++) 
@@ -786,10 +810,21 @@ int pointInPolygon(vector<long double> roi_extremes)
 {
 	int selected = 0;
 
+	std::lock_guard<std::mutex> linesLock(linesMutex);
+
 	int counter;
-	for(counter = 0; counter<(int)(selected_lines_id.size());counter++)
+
+	for(counter = 0; counter< selected_lines_id.size();counter++)
 	{
-		(lines.find(selected_lines_id.at(counter))->second)->setSelectedState(0);
+		auto selectedLineId = selected_lines_id.at(counter);
+		
+		auto foundLine = lines.find(selectedLineId);
+		if (foundLine != lines.end()) {
+			auto selectedLine = foundLine->second;
+			if (selectedLine != NULL) {
+				selectedLine->setSelectedState(0);
+			}
+		}
 	}
 
 	selected_lines_id.clear();
@@ -989,6 +1024,12 @@ void mouse(int button, int state, int x, int y) {
 		else if (button == GLUT_RIGHT_BUTTON && state == GLUT_UP)
 		{
 			std::cout << "Mouse: Right button up" << std::endl;
+
+			tg.type = TG_ROTATE_CLOCK;
+			TouchOverlayController::OnTG_RotateClock(tg, NULL);
+
+			tg.type = TG_TOUCH_END;
+			TouchOverlayController::OnTG_TouchEnd(tg, NULL);
 		}
 	}
 	

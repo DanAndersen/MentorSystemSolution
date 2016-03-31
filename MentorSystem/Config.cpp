@@ -1,0 +1,4 @@
+#include "Config.h"
+
+int SERVER_RESOLUTION_X = 1920;
+int SERVER_RESOLUTION_Y = 1080;

@@ -1,1 +1,1 @@
-{"command":"DeleteAnnotationCommand","id":1}
+{"command":"DeleteAnnotationCommand","id":5}

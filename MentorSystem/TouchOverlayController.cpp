@@ -18,6 +18,7 @@
 
 //Include its header file
 #include "TouchOverlayController.h"
+#include "Config.h"
 
 //--------------------------Definitions--------------------------//
 #define BIG_VALUE 10000
@@ -279,6 +280,9 @@ void TouchOverlayController:: OnGetServerResolution(int x, int y, void * call_ba
 	}
 
 	cout << " server resolution:" << x << "," << y << endl;
+
+	SERVER_RESOLUTION_X = x;
+	SERVER_RESOLUTION_Y = y;
 }
 
 /*
@@ -426,10 +430,18 @@ void TouchOverlayController:: OnTG_Down(const TouchGesture & tg,void * call_obje
 	}
 
 	assert(tg.type == TG_DOWN && tg.param_size >= 2);
+
+	double posX = tg.params[0];
+	double posY = tg.params[1];
+
+	// the click analysis assumes that the incoming click was on a (GUI_MEASURED_RESOLUTION_X, GUI_MEASURED_RESOLUTION_Y) screen
+	// but it may not be. So convert it.
+	posX = posX * (double)GUI_MEASURED_RESOLUTION_X / (double)SERVER_RESOLUTION_X;
+	posY = posY * (double)GUI_MEASURED_RESOLUTION_Y / (double)SERVER_RESOLUTION_Y;
 	
 	if(myCommander->getLinesDrawableFlag())
 	{
-		OpenGLtouchControls(ADD_POINT,annotationCounter,(long double)tg.params[0],(long double)tg.params[1]);
+		OpenGLtouchControls(ADD_POINT,annotationCounter,(long double)posX,(long double)posY);
 	}
 
 	last_type = tg.type;
@@ -450,7 +462,18 @@ void TouchOverlayController:: OnTG_Click(const TouchGesture & tg,void * call_obj
 
 	assert(tg.type == TG_CLICK);
 
-	int button_clicked = myGUI->clickAnalysis(tg.params[0],tg.params[1]);
+	double posX = tg.params[0];
+	double posY = tg.params[1];
+
+	// the click analysis assumes that the incoming click was on a (GUI_MEASURED_RESOLUTION_X, GUI_MEASURED_RESOLUTION_Y) screen
+	// but it may not be. So convert it.
+	posX = posX * (double)GUI_MEASURED_RESOLUTION_X / (double)SERVER_RESOLUTION_X;
+	posY = posY * (double)GUI_MEASURED_RESOLUTION_Y / (double)SERVER_RESOLUTION_Y;
+
+
+
+
+	int button_clicked = myGUI->clickAnalysis(posX,posY);
 
 	std::cout << "button_clicked: " << button_clicked << std::endl;
 
@@ -461,7 +484,7 @@ void TouchOverlayController:: OnTG_Click(const TouchGesture & tg,void * call_obj
 			//Checks if it is on editing mode
 			if(!(myCommander->getLinesDrawableFlag()) && !(myCommander->getPointsDrawableFlag()))
 			{
-				int annotation_selected_id = myGUI->checkAnnotationSelected((long double)tg.params[0],(long double)tg.params[1]);
+				int annotation_selected_id = myGUI->checkAnnotationSelected((long double)posX,(long double)posY);
 
 				if(annotation_selected_id==-1)
 				{
@@ -483,29 +506,33 @@ void TouchOverlayController:: OnTG_Click(const TouchGesture & tg,void * call_obj
 				}
 			}
 			//Checks if the annotations panel was clicked
-			if (myCommander->getAnnotationPanelShownFlag() && (int)tg.params[0] < OPEN_PANEL_TAB_MIN_X 
-				&& (int)tg.params[0] > CLOSED_PANEL_TAB_MAX_X)
+			if (myCommander->getAnnotationPanelShownFlag() && (int)posX < OPEN_PANEL_TAB_MIN_X 
+				&& (int)posY > CLOSED_PANEL_TAB_MAX_X)
 			{
-				selected_annotation_code = myGUI->touchedAnnotationIdentification(tg.params[0],tg.params[1]);
+				int touchedAnnotationId = myGUI->touchedAnnotationIdentification(posX,posY);
 
-				myCommander->setVirtualAnnotationCreationFlag(1);
+				if (touchedAnnotationId > 0) {
+					selected_annotation_code = touchedAnnotationId;
 
-				myCommander->setLinesDrawableFlag(0);
-				myCommander->setPointsDrawableFlag(0);
+					myCommander->setVirtualAnnotationCreationFlag(1);
+
+					myCommander->setLinesDrawableFlag(0);
+					myCommander->setPointsDrawableFlag(0);
+				}
 			}
 			//Checks if it is on draw points mode
 			else if(myCommander->getPointsDrawableFlag())
 			{
 				OpenGLtouchControls(CLEAR_LINE,NULL,NULL,NULL);
 
-				OpenGLtouchControls(ADD_POINT_ANNOTATION,annotationCounter,(long double)tg.params[0],(long double)tg.params[1]);
+				OpenGLtouchControls(ADD_POINT_ANNOTATION,annotationCounter,(long double)posX,(long double)posY);
 
 				annotationCounter++;
 			}
 		}
 		else
 		{
-			myGUI->createVirtualAnnotation(annotationCounter,(long double)tg.params[0],(long double)tg.params[1],selected_annotation_code);
+			myGUI->createVirtualAnnotation(annotationCounter,(long double)posX,(long double)posY,selected_annotation_code);
 
 			myCommander->setVirtualAnnotationCreationFlag(0);
 
@@ -553,7 +580,16 @@ void TouchOverlayController:: OnTG_MoveRight(const TouchGesture & tg,void * call
 	}
 
 	assert(tg.type == TG_MOVE_RIGHT);
-	OnMove((long double)tg.params[0], (long double)tg.params[1]);
+
+	double posX = tg.params[0];
+	double posY = tg.params[1];
+
+	// the click analysis assumes that the incoming click was on a (GUI_MEASURED_RESOLUTION_X, GUI_MEASURED_RESOLUTION_Y) screen
+	// but it may not be. So convert it.
+	posX = posX * (double)GUI_MEASURED_RESOLUTION_X / (double)SERVER_RESOLUTION_X;
+	posY = posY * (double)GUI_MEASURED_RESOLUTION_Y / (double)SERVER_RESOLUTION_Y;
+
+	OnMove((long double)posX, (long double)posY);
 	last_type = tg.type;
 }
 
@@ -573,7 +609,16 @@ void TouchOverlayController:: OnTG_MoveLeft(const TouchGesture & tg,void * call_
 	}
 
 	assert(tg.type == TG_MOVE_LEFT);
-	OnMove((long double)tg.params[0], (long double)tg.params[1]);
+
+	double posX = tg.params[0];
+	double posY = tg.params[1];
+
+	// the click analysis assumes that the incoming click was on a (GUI_MEASURED_RESOLUTION_X, GUI_MEASURED_RESOLUTION_Y) screen
+	// but it may not be. So convert it.
+	posX = posX * (double)GUI_MEASURED_RESOLUTION_X / (double)SERVER_RESOLUTION_X;
+	posY = posY * (double)GUI_MEASURED_RESOLUTION_Y / (double)SERVER_RESOLUTION_Y;
+
+	OnMove((long double)posX, (long double)posY);
 	last_type = tg.type;
 }
 
@@ -589,7 +634,16 @@ void TouchOverlayController:: OnTG_MoveDown(const TouchGesture & tg,void * call_
 	}
 
 	assert(tg.type == TG_MOVE_DOWN);
-	OnMove((long double)tg.params[0], (long double)tg.params[1]);
+	
+	double posX = tg.params[0];
+	double posY = tg.params[1];
+
+	// the click analysis assumes that the incoming click was on a (GUI_MEASURED_RESOLUTION_X, GUI_MEASURED_RESOLUTION_Y) screen
+	// but it may not be. So convert it.
+	posX = posX * (double)GUI_MEASURED_RESOLUTION_X / (double)SERVER_RESOLUTION_X;
+	posY = posY * (double)GUI_MEASURED_RESOLUTION_Y / (double)SERVER_RESOLUTION_Y;
+
+	OnMove((long double)posX, (long double)posY);
 	last_type = tg.type;
 }
 
@@ -605,7 +659,16 @@ void TouchOverlayController:: OnTG_MoveUp(const TouchGesture & tg,void * call_ob
 	}
 
 	assert(tg.type == TG_MOVE_UP);
-	OnMove((long double)tg.params[0], (long double)tg.params[1]);
+	
+	double posX = tg.params[0];
+	double posY = tg.params[1];
+
+	// the click analysis assumes that the incoming click was on a (GUI_MEASURED_RESOLUTION_X, GUI_MEASURED_RESOLUTION_Y) screen
+	// but it may not be. So convert it.
+	posX = posX * (double)GUI_MEASURED_RESOLUTION_X / (double)SERVER_RESOLUTION_X;
+	posY = posY * (double)GUI_MEASURED_RESOLUTION_Y / (double)SERVER_RESOLUTION_Y;
+
+	OnMove((long double)posX, (long double)posY);
 	last_type = tg.type;
 }
 
