@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 	GUIMan = new GUIManager(resolutionX,resolutionY,commander,JsonMan);
 
 	//TouchController Init
-	int err_code = touchMan.Init(commander,GUIMan);
+	int err_code = touchMan.Init(commander,GUIMan, cameraMan);
 	if(err_code != PQMTE_SUCCESS){
 		cout << "press any key to exit..." << endl;
 		getchar();
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 	_beginthread( JSONLoop, 0, (void*)12);
 
 	//VideoManager Init
-	videoMan = new VideoManager(communicationMan,commander,GUIMan);
+	videoMan = new VideoManager(communicationMan,commander,GUIMan, cameraMan);
 
 	//VideoManager Thread Init
 	_beginthread( videoLoop, 0, (void*)12);

@@ -386,7 +386,9 @@ void openGLDrawLines()
 			float x = to_draw->getPoints()->at(i);
 			float y = to_draw->getPoints()->at(i+1);
 
-			glVertex2f(x, y);
+			cv::Point2d screenSpacePoint = myCamera->convertWorldSpaceToScreenSpace(x, y);
+
+			glVertex2f(screenSpacePoint.x, screenSpacePoint.y);
 		}
 
 		glEnd();

@@ -41,7 +41,7 @@ class VideoManager
 {
 public:
 	//-------------------------Methods---------------------------//
-	VideoManager(CommunicationManager* server, CommandCenter* pCommander, GUIManager* pGUI);//Class Constructor
+	VideoManager(CommunicationManager* server, CommandCenter* pCommander, GUIManager* pGUI, CameraManager* pCamera);//Class Constructor
 
 	//Apply geometrical transformations based on touch events
 	/*CURRENTLY NOT BEING USED*/
@@ -92,6 +92,8 @@ private:
 
 	//Instance of the communication server
 	CommunicationManager* myServer;
+
+	CameraManager* myCamera;
 
 	//Instance of the GUI creator
 	GUIManager* GUIcreator;

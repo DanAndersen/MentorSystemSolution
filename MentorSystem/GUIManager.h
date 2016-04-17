@@ -46,6 +46,8 @@ public:
 	//Starts the GUI creation process
 	cv::Mat createGUI(cv::Mat showImage);
 
+	cv::Mat overlaySpriteAnnotations(cv::Mat inputImage);
+
 	//Interpretation of whereas or not a button was clicked 
 	int clickAnalysis(double posX, double posY);
 

@@ -26,10 +26,12 @@
  * Parameters (2): Instance of the Command Center
  * Return: Instance of the class
  */
-VideoManager::VideoManager(CommunicationManager* server, CommandCenter* pCommander, GUIManager* pGUI) 
+VideoManager::VideoManager(CommunicationManager* server, CommandCenter* pCommander, GUIManager* pGUI, CameraManager* pCamera) 
 {
 	//Sets the given instance as the one that will be used
 	myServer = server;
+
+	myCamera = pCamera;
 
 	//Image constants
 	rescamX = 640;
@@ -73,17 +75,18 @@ void VideoManager::initWindow()
 	Size size = Size(rescompX,rescompY);
 
 	//Image matrices that will be used to create the final image
-	Mat temp, rotated, flipped, show;
+	Mat temp, rotated, flippedImage, show;
+	Mat flippedResizedImage;
 
 	//Creates a matrix of zeros. 
 	//The size of it will be the size of the obtained webcam image
-	Mat img = Mat::zeros(rescamY, rescamX, CV_8UC3);
+	Mat imageFromTrainee = Mat::zeros(rescamY, rescamX, CV_8UC3);
 	//Calculates the total size of image matriz recently created
-	int imgSize = (int)(img.total()*img.elemSize());
+	int imageFromTraineeSize = (int)(imageFromTrainee.total()*imageFromTrainee.elemSize());
 	//Buffer to store the receieve data stream in
 	char* sockData;
 	//Allocates enough memory for the buffer.
-	sockData = (char *)malloc(sizeof(char)*imgSize+1);
+	sockData = (char *)malloc(sizeof(char)*imageFromTraineeSize +1);
 
 
 
@@ -133,7 +136,7 @@ void VideoManager::initWindow()
 				if (numBytesReadForPacket == packetSizeInBytes) {
 					// then decode the packet
 
-					receivedNewFrame = this->_videoDecoder.decode(sockData, packetSizeInBytes, &img);
+					receivedNewFrame = this->_videoDecoder.decode(sockData, packetSizeInBytes, &imageFromTrainee);
 					//std::cout << "received new frame? " << receivedNewFrame << std::endl;
 				}
 				else {
@@ -148,7 +151,7 @@ void VideoManager::initWindow()
 			// original method of sending frames -- uncompressed bitmaps
 
 			//Receives the image data stream from the client
-			int data_length = myServer->receiveFromClients(sockData, imgSize, VIDEO_NETWORK_CODE);
+			int data_length = myServer->receiveFromClients(sockData, imageFromTraineeSize, VIDEO_NETWORK_CODE);
 
 			if (data_length <= 0)
 			{
@@ -189,21 +192,20 @@ void VideoManager::initWindow()
 			//img = imread("../images/surgical_room.jpg");
 
 			//Flips the image around both axis (to fit OpenGL window)
-			flip(img, flipped, 0);
+			flip(imageFromTrainee, flippedImage, 0);
 
-			//Rotation starts here
-			//Finds the center of the region of interest
-			Point2f pc(((br.x - tl.x) / 2.0f) + tl.x, ((br.y - tl.y) / 2.0f) + tl.y);
+			// resize the image to our display resolution
+			resize(flippedImage, flippedResizedImage, size);
 
-			//Creates a rotation matrix around the center of the roi
-			temp = getRotationMatrix2D(pc, rotationDegree, 1.0);
+			// transform the image based on homography
+			cv::Mat homography = myCamera->getHomography();
 
-			//Applies the rotation matrix to every pixel on the image
-			warpAffine(flipped, rotated, temp, flipped.size());
-			//Rotation ends here
 
-			//Resizes the image
-			resize(rotated(roi), show, size);
+			Mat imageWithSpriteAnnotations = GUIcreator->overlaySpriteAnnotations(flippedResizedImage);
+
+
+			//Applies the homography matrix to every pixel on the image
+			warpAffine(imageWithSpriteAnnotations, show, homography(cv::Rect(0,0,3,2)), imageWithSpriteAnnotations.size());
 
 			/*
 			LARGE_INTEGER time_end_manipulate_image;
@@ -480,17 +482,6 @@ void VideoManager::keyboardInteractions()
 	if ( key=='a' )//right
 	{
 		//Evaluates if the can be translated right
-		if (br.x+panStep<rescamX)
-		{
-			//Modifies the region of interest
-			tl = Point(tl.x+panStep,tl.y);
-			br = Point(br.x+panStep,br.y);
-			roi= Rect(tl,br); 
-		}
-	}
-
-	if ( key=='a' )//right
-	{
 		if (br.x+panStep<rescamX)
 		{
 			//Modifies the region of interest

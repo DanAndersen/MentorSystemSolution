@@ -31,12 +31,14 @@
 #include <iostream>//Input/Output Functions
 #include <sstream>//String Stream Functions
 #include <vector>////Enable the usage of the vector class
+#include "CameraManager.h"
 #include "PQMTClient.h"//PQLabs Libraries
 #include "CommandCenter.h"//General Program Flow Controller
 #include "AnnotationsManager.h"//OpenGL Annotations Manager
 #include "GUIManager.h"//Methods used to create the GUI
 #include "GUIDefinitions.h"//Definitions required for the GUI usage
 #include "touchCommands.h"//Touch events standard commands
+
 
 using namespace std;//Standard Libraries
 
@@ -55,7 +57,7 @@ public:
 	~TouchOverlayController();//Class Destructor
 
 	//Starts the internal variables of the controller
-	int Init(CommandCenter* pCommander, GUIManager* pGUI);
+	int Init(CommandCenter* pCommander, GUIManager* pGUI, CameraManager* pCamera);
 
 	//------------------------Variables--------------------------//
 
@@ -67,6 +69,8 @@ public:
 	//Instance of the GUIManager
 	static GUIManager* myGUI;
 	
+	static CameraManager* myCamera;
+
 	//Method to handle the Touch Down event
 	static void OnTG_Down(const TouchGesture & tg, void * call_object);
 

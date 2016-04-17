@@ -46,6 +46,26 @@ GUIManager::GUIManager(int resX, int resY, CommandCenter* pCommander, JSONManage
 	initImages();
 }
 
+
+
+/*
+* Method Overview: Overlays sprite annotations on the image
+* Parameters: Image to overlay sprite annotations on top
+* Return: Created image with sprite annotations
+*/
+cv::Mat GUIManager::overlaySpriteAnnotations(cv::Mat inputImage)
+{
+	finalResult = overlayAnnotations(inputImage);
+
+	return finalResult;
+}
+
+
+
+
+
+
+
 /*
  * Method Overview: Overlays the GUI on top of an image
  * Parameters: Image to overlay GUI on top
@@ -103,10 +123,7 @@ cv::Mat GUIManager::createGUI(cv::Mat showImage)
 	overlayImage(finalResult, ButtonExit, tempResult, cv::Point(resolutionX-BUTTON_SIZE,
 		resolutionY-BUTTON_SIZE));
 	
-	finalResult = overlayAnnotations(tempResult);
-
-
-	//cv::circle(finalResult, cv::Point(100, 100), 10, cv::Scalar(255, 255, 255));
+	tempResult.copyTo(finalResult);
 
 	return finalResult;
 }
@@ -499,7 +516,7 @@ cv::Mat GUIManager::overlayAnnotations(cv::Mat GUIImage)
 		coordinateX = (iter->second->getExtremePoints()[0]);
 		coordinateY = (iter->second->getExtremePoints()[3]);
 		image_to_show = iter->second->imageRotation(iter->second->getImage());
-
+		
 		int timer;
 		for(timer=0;timer<250;timer++)
 		{

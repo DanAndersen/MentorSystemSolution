@@ -72,6 +72,12 @@ public:
 	// Returns true if a camera control key was pressed, false otherwise;
 	bool handleKey(unsigned char key);
 
+	cv::Mat getHomography();	// convert from world space to screen space
+	cv::Mat getInverseHomography();	// convert from screen space to world space
+
+	cv::Point2d convertScreenSpaceToWorldSpace(long double x, long double y);
+	cv::Point2d convertWorldSpaceToScreenSpace(long double x, long double y);
+
 private:
 	static const unsigned char CAMERA_KEY_ZOOM_OUT = '7';
 	static const unsigned char CAMERA_KEY_MOVE_UP = '8';
@@ -84,10 +90,11 @@ private:
 	static const unsigned char CAMERA_KEY_ROTATE_CW = '3';
 
 	float _scale;	// zoom in/out factor
-	float _thetaRadians; // rotation ccw
+	float _thetaDegrees; // rotation ccw
 	cv::Point2f _translation; // translation from default point
 
 	cv::Mat _homography;
+	cv::Mat _inverseHomography;
 
 	void reset();
 

@@ -27,6 +27,7 @@
 //--------------------------Variables----------------------------//
 CommandCenter* TouchOverlayController::myCommander;
 GUIManager* TouchOverlayController::myGUI;
+CameraManager* TouchOverlayController::myCamera;
 int TouchOverlayController::annotationCounter;
 int TouchOverlayController::selected_annotation_code;
 vector<long double> TouchOverlayController::roi_extremes;
@@ -69,7 +70,7 @@ bool TouchOverlayController::isInMockMode() {
  * Parameters (2): Instance of the Command Center
  * Return: flag of successfulness
  */
-int TouchOverlayController::Init(CommandCenter* pCommander, GUIManager* pGUI)
+int TouchOverlayController::Init(CommandCenter* pCommander, GUIManager* pGUI, CameraManager* pCamera)
 {
 	// initially set mock mode to false -- assume that multitouch system will be used
 	_mockMode = false;
@@ -79,6 +80,8 @@ int TouchOverlayController::Init(CommandCenter* pCommander, GUIManager* pGUI)
 
 	//Establishes the GUIManager
 	myGUI = pGUI;
+
+	myCamera = pCamera;
 
 	//Successful Init
 	int err_code = PQMTE_SUCCESS;
@@ -439,9 +442,13 @@ void TouchOverlayController:: OnTG_Down(const TouchGesture & tg,void * call_obje
 	posX = posX * (double)GUI_MEASURED_RESOLUTION_X / (double)SERVER_RESOLUTION_X;
 	posY = posY * (double)GUI_MEASURED_RESOLUTION_Y / (double)SERVER_RESOLUTION_Y;
 	
+	// input X/Y are in screen-space
+	// we may need to convert to world-space to be able to manipulate annotations the way we want to
+	cv::Point2d worldSpacePoint = myCamera->convertScreenSpaceToWorldSpace(posX, posY);
+
 	if(myCommander->getLinesDrawableFlag())
 	{
-		OpenGLtouchControls(ADD_POINT,annotationCounter,(long double)posX,(long double)posY);
+		OpenGLtouchControls(ADD_POINT,annotationCounter, worldSpacePoint.x, worldSpacePoint.y);
 	}
 
 	last_type = tg.type;
@@ -470,7 +477,9 @@ void TouchOverlayController:: OnTG_Click(const TouchGesture & tg,void * call_obj
 	posX = posX * (double)GUI_MEASURED_RESOLUTION_X / (double)SERVER_RESOLUTION_X;
 	posY = posY * (double)GUI_MEASURED_RESOLUTION_Y / (double)SERVER_RESOLUTION_Y;
 
-
+	// input X/Y are in screen-space
+	// we may need to convert to world-space to be able to manipulate annotations the way we want to
+	cv::Point2d worldSpacePoint = myCamera->convertScreenSpaceToWorldSpace(posX, posY);
 
 
 	int button_clicked = myGUI->clickAnalysis(posX,posY);
@@ -484,7 +493,7 @@ void TouchOverlayController:: OnTG_Click(const TouchGesture & tg,void * call_obj
 			//Checks if it is on editing mode
 			if(!(myCommander->getLinesDrawableFlag()) && !(myCommander->getPointsDrawableFlag()))
 			{
-				int annotation_selected_id = myGUI->checkAnnotationSelected((long double)posX,(long double)posY);
+				int annotation_selected_id = myGUI->checkAnnotationSelected(worldSpacePoint.x, worldSpacePoint.y);
 
 				if(annotation_selected_id==-1)
 				{
@@ -525,14 +534,14 @@ void TouchOverlayController:: OnTG_Click(const TouchGesture & tg,void * call_obj
 			{
 				OpenGLtouchControls(CLEAR_LINE,NULL,NULL,NULL);
 
-				OpenGLtouchControls(ADD_POINT_ANNOTATION,annotationCounter,(long double)posX,(long double)posY);
+				OpenGLtouchControls(ADD_POINT_ANNOTATION,annotationCounter, worldSpacePoint.x, worldSpacePoint.y);
 
 				annotationCounter++;
 			}
 		}
 		else
 		{
-			myGUI->createVirtualAnnotation(annotationCounter,(long double)posX,(long double)posY,selected_annotation_code);
+			myGUI->createVirtualAnnotation(annotationCounter, worldSpacePoint.x, worldSpacePoint.y, selected_annotation_code);
 
 			myCommander->setVirtualAnnotationCreationFlag(0);
 
@@ -551,16 +560,24 @@ void TouchOverlayController::OnMove(long double x, long double y) {
 		std::cout << "OnMove" << std::endl;
 	}
 
+
+	// input X/Y are in screen-space
+	// we need to convert to world-space to be able to manipulate annotations the way we want to
+	cv::Point2d worldSpacePoint = myCamera->convertScreenSpaceToWorldSpace(x, y);
+
+
+
+
 	if (myCommander->getLinesDrawableFlag())
 	{
 		myCommander->setLineDrawnFlag(1);
-		OpenGLtouchControls(ADD_POINT, annotationCounter, x, y);
+		OpenGLtouchControls(ADD_POINT, annotationCounter, worldSpacePoint.x, worldSpacePoint.y);
 	}
 	else
 	{
 		myCommander->setRoiDrawnFlag(1);
-		roi_extremes.push_back(x);
-		roi_extremes.push_back(y);
+		roi_extremes.push_back(worldSpacePoint.x);
+		roi_extremes.push_back(worldSpacePoint.y);
 	}
 }
 
