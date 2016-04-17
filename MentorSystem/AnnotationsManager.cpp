@@ -50,6 +50,9 @@ CommandCenter* myCommander;
 //JSONManager instance
 JSONManager* myJSON;
 
+//CameraManager instance
+CameraManager* myCamera;
+
 //Stores all the lines that are going to be drawn by Bressenham
 map<int, LineAnnotation*> lines; 
 std::mutex linesMutex;  // protects lines
@@ -394,6 +397,16 @@ void openGLDrawLines()
 	glDisableClientState(GL_COLOR_ARRAY);
 }
 
+
+// handles special keyboard presses (e.g. arrow keys, Home/End, etc)
+void handleSpecialKeypress(int key, int x, int y) {
+}
+
+
+
+
+
+
 /*
  * Method Overview: Keyboard events handling
  * Parameters: Pressed Key, (x,y) positions of the mouse in screen
@@ -401,10 +414,16 @@ void openGLDrawLines()
  */
 void keyboard(unsigned char key, int x, int y)
 {
-	//analyzes which key was pressed
-    switch (key)
-    {
-		//quit
+	
+	bool keyConsumed = false;
+
+	keyConsumed = myCamera->handleKey(key);
+
+	if (!keyConsumed) {
+		//analyzes which key was pressed
+		switch (key)
+		{
+			//quit
 		case 'q': case 'Q':
 			glutLeaveMainLoop();
 			exit(0);
@@ -429,7 +448,9 @@ void keyboard(unsigned char key, int x, int y)
 				_usingMouseAndMotionCallbacks = true;
 			}
 			break;
+		}
 	}
+	
 }
 
 /*
@@ -1042,13 +1063,16 @@ void mouse(int button, int state, int x, int y) {
  * Parameters (3): Instance of the JSON Manager
  * Return: None
  */
-void initWindow(int argc, char* argv[], int resX, int resY, CommandCenter* pCommander, JSONManager* pJSON)
+void initWindow(int argc, char* argv[], int resX, int resY, CommandCenter* pCommander, JSONManager* pJSON, CameraManager* pCamera)
 {
 	//Sets the CommandCenter instance as own
 	myCommander = pCommander;
 
 	//Sets the JSONManager instance as own
 	myJSON = pJSON;
+
+	// Sets the CameraManager instance as own
+	myCamera = pCamera;
 
 	//Assigns the scene resolution
 	resolutionX = resX;
@@ -1069,6 +1093,7 @@ void initWindow(int argc, char* argv[], int resX, int resY, CommandCenter* pComm
 	glutIdleFunc(refresh);
 	glutDisplayFunc(draw_scene);
 	glutKeyboardFunc(keyboard);
+	glutSpecialFunc(handleSpecialKeypress);
 	glutMouseFunc(mouse);
 	glutMotionFunc(motion);
 	glClearColor(1.0, 1.0, 1.0, 1.0);

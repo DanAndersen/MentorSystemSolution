@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="Annotation.cpp" />
     <ClCompile Include="AnnotationsManager.cpp" />
+    <ClCompile Include="CameraManager.cpp" />
     <ClCompile Include="CommandCenter.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="GUIManager.cpp" />
@@ -41,6 +42,7 @@
   <ItemGroup>
     <ClInclude Include="Annotation.h" />
     <ClInclude Include="annotationCommands.h" />
+    <ClInclude Include="CameraManager.h" />
     <ClInclude Include="CommandCenter.h" />
     <ClInclude Include="communicationDefinitions.h" />
     <ClInclude Include="Config.h" />

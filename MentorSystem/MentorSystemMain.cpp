@@ -30,6 +30,7 @@
 #include "VideoManager.h"//OpenCV Video Manager
 #include <process.h>//Windows Threads
 #include "Config.h"
+#include "CameraManager.h"
 
 using namespace std;//Standard Libraries
 
@@ -40,6 +41,7 @@ GUIManager* GUIMan;
 TouchOverlayController touchMan;
 VideoManager* videoMan;
 JSONManager* JsonMan;
+CameraManager* cameraMan;
 
 //------Functions used to create the Windows' threads loops------//
 void communicationLoop(void *);
@@ -53,11 +55,13 @@ void JSONLoop(void *);
  */
 int main(int argc, char *argv[]) 
 {
-	int resolutionX = SCREEN_RESOLUTION_X;
-	int resolutionY = SCREEN_RESOLUTION_Y;
+	int resolutionX = SERVER_RESOLUTION_X;
+	int resolutionY = SERVER_RESOLUTION_X;
 
 	//init the CommandCenter
 	commander = new CommandCenter();
+
+	cameraMan = new CameraManager();
 
 	//CommunicationManager Init
 	communicationMan = new CommunicationManager();
@@ -90,7 +94,7 @@ int main(int argc, char *argv[])
 
 	//AnnotationsManager Init
 	//TODO: Replace dims with .txt config file
-	initWindow(argc, argv, resolutionX, resolutionY,commander,JsonMan);
+	initWindow(argc, argv, resolutionX, resolutionY,commander,JsonMan, cameraMan);
 	
 	return 0;
 }

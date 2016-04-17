@@ -38,6 +38,7 @@
 #include "JSONDefinitions.h"////General JSON definitions
 #include "PQMTClient.h"//PQLabs Libraries
 #include "TouchOverlayController.h"
+#include "CameraManager.h"
 
 using namespace std;//Standard Library
 
@@ -114,6 +115,6 @@ void draw_scene();
 void refresh();
 
 //Inits framebuffer and the OpenGL environment
-void initWindow(int argc, char* argv[], int resX, int resY, CommandCenter* pCommander, JSONManager* pJSON);
+void initWindow(int argc, char* argv[], int resX, int resY, CommandCenter* pCommander, JSONManager* pJSON, CameraManager* pCamera);
 
 void updateBackgroundOpenCVImage(cv::Mat image);

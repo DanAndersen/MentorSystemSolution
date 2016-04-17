@@ -1,12 +1,4 @@
 #pragma once
 
-#ifndef SCREEN_RESOLUTION_X
-#define SCREEN_RESOLUTION_X 1920
-#endif
-
-#ifndef SCREEN_RESOLUTION_Y
-#define SCREEN_RESOLUTION_Y 1080
-#endif
-
 extern int SERVER_RESOLUTION_X;
 extern int SERVER_RESOLUTION_Y;
