@@ -56,7 +56,7 @@ void JSONLoop(void *);
 int main(int argc, char *argv[]) 
 {
 	int resolutionX = SERVER_RESOLUTION_X;
-	int resolutionY = SERVER_RESOLUTION_X;
+	int resolutionY = SERVER_RESOLUTION_Y;
 
 	//init the CommandCenter
 	commander = new CommandCenter();

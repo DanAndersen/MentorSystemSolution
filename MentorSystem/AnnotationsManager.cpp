@@ -398,10 +398,6 @@ void openGLDrawLines()
 }
 
 
-// handles special keyboard presses (e.g. arrow keys, Home/End, etc)
-void handleSpecialKeypress(int key, int x, int y) {
-}
-
 
 
 
@@ -1093,7 +1089,6 @@ void initWindow(int argc, char* argv[], int resX, int resY, CommandCenter* pComm
 	glutIdleFunc(refresh);
 	glutDisplayFunc(draw_scene);
 	glutKeyboardFunc(keyboard);
-	glutSpecialFunc(handleSpecialKeypress);
 	glutMouseFunc(mouse);
 	glutMotionFunc(motion);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
