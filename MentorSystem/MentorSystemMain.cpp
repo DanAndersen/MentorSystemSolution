@@ -106,10 +106,12 @@ int main(int argc, char *argv[])
  * Method Overview: Infinite loop for the communication process
  * Parameters: Void array
  * Return: None
- */
-void communicationLoop(void * arg) 
 { 
-    while(1) 
+
+ */
+void communicationLoop(void * arg)
+{	
+	while(1) 
     {
 		//update to accept new clients
 		communicationMan->update();

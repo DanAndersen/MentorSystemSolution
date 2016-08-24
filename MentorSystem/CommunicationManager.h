@@ -59,6 +59,8 @@ private:
 	//Actually starts the reception of a message
 	int startReception(ServerNetwork* network, char * recvbuf, int bufSize);
 
+	int startReceptionGesture(ServerNetwork* network, char * recvbuf, int bufSize);
+
 	//Actually starts the dispatch of a message
 	int startDispatch(ServerNetwork* network, const char * message);
 

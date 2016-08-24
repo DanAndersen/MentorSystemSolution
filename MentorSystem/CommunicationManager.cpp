@@ -87,7 +87,7 @@ void CommunicationManager::update()
 		printf("gesture client %d has been connected to the server\n",gesture_client_id);
 
 		//Increase the client counter
-		json_client_id++;
+		gesture_client_id++;
 	}
 }
 
@@ -107,7 +107,7 @@ int CommunicationManager::receiveFromClients(char * recvbuf, int bufSize, int ne
 	} 
 	else if(networkType == GESTURE_NETWORK_CODE)
 	{
-		data_length = startReception(gestureNetwork, recvbuf, bufSize);
+		data_length = startReceptionGesture(gestureNetwork, recvbuf, bufSize);
 	}
 
 	return data_length;
@@ -142,7 +142,6 @@ int CommunicationManager::sendActionPackets(const char * message, int networkTyp
  */
 int CommunicationManager::startReception(ServerNetwork* network, char * recvbuf, int bufSize)
 {
-
 	int data_length=0;
 	int i;
 
@@ -168,6 +167,21 @@ int CommunicationManager::startReception(ServerNetwork* network, char * recvbuf,
 
 	}
 	return i;
+}
+
+/*
+ * Method Overview: Calls the method to receive data from clients
+ * Parameters (1): Network to use to receive data from
+ * Parameters (2): Buffer to store the received data and its size
+ * Return: Length of the received data
+ */
+int CommunicationManager::startReceptionGesture(ServerNetwork* network, char * recvbuf, int bufSize)
+{
+	int data_length=0;
+	
+	data_length = network->receiveData(gesture_client_id-1, recvbuf, bufSize);
+
+	return data_length;
 }
 
 /*

@@ -85,14 +85,8 @@ void VideoManager::initWindow()
 	int imageFromTraineeSize = (int)(imageFromTrainee.total()*imageFromTrainee.elemSize());
 	//Buffer to store the receieve data stream in
 	char* sockData;
-	//Character where we will store the message sent from the gesture client
-	char* gestureData;
-	//Buffer size of message from gesture client
-	int gestureBuffSize = 1;
 	//Allocates enough memory for the buffer.
 	sockData = (char *)malloc(sizeof(char)*imageFromTraineeSize +1);
-	//Allocates enough memory for the buffer.
-	gestureData = (char *)malloc(sizeof(char));
 
 
 
@@ -223,6 +217,9 @@ void VideoManager::initWindow()
 			*/
 		}
 		
+		
+
+
 		//Enables the image to be controlled by keyboard events
 		keyboardInteractions();
 
@@ -271,24 +268,11 @@ void VideoManager::initWindow()
 		}
 		*/
 
-		//// Read Gesture client data
-		cout << "BEFORE READING FROM GESTURE CLIENT" << endl;
-		int gesture_data_length = myServer->receiveFromClients(gestureData, gestureBuffSize, GESTURE_NETWORK_CODE);
-		cout << "AFTER READOMG FROM GESTURE CLIENT" << endl;
-		if (gesture_data_length <= 0){
-			//nodata or incomplete data
-			continue;
-		}else{
-			myCamera->handleKey(*gestureData);
-		}
-
 	}
 
 	if (this->_usingVideoDecoder) {
 		_videoDecoder.destroyDecoder();
 	}
-
-
 }
 
 /*
