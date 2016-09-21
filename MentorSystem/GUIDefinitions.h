@@ -71,6 +71,11 @@
 #define ANNOTATION_PANEL_HIDDEN_PATH "../images/AnnotationPanelHidden.png"
 #endif
 
+//Path to the Selected Panel Square  image
+#ifndef SELECTED_PANEL_SQUARE_PATH
+#define SELECTED_PANEL_SQUARE_PATH "../images/selected_panel_square.png"
+#endif
+
 //--------------------General GUI Definitions--------------------//
 
 ////

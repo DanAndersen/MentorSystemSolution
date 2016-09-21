@@ -75,7 +75,7 @@ public:
 	static void OnTG_Down(const TouchGesture & tg, void * call_object);
 
 	//Method to handle the Touch Move event
-	//static void OnTG_Move(const TouchGesture & tg,void * call_object);
+	static void OnTG_Move(const TouchGesture & tg,void * call_object);
 
 	//Method to handle the Touch Up event
 	//static void OnTG_Up(const TouchGesture & tg,void * call_object);
@@ -137,6 +137,9 @@ public:
 	//Method to handle the Touch Start event
 	static void OnTG_TouchStart(const TouchGesture & tg, void * call_object);
 
+	//Method to handle the Multi Touch event
+	static void onTG_MultiTouch(const TouchGesture & tg, void * call_object);
+
 private:
 
 	// if true, then don't actually use the multitouch system,
@@ -144,6 +147,9 @@ private:
 	bool _mockMode;
 
 	bool isInMockMode();
+
+	//Transforms a point in space coordinates to world coordinates
+	static cv::Point2d spaceToWorld(const double* spaceCoord);
 
 	//-------------------------Methods---------------------------//
 		//----------------Call Back Methods------------------//
@@ -185,12 +191,6 @@ private:
 	//Metthod to handle a default touch gesture event
 	//static void DefaultOnTG(const TouchGesture & tg,void * call_object);
 
-	
-
-	
-
-	
-
 	//------------------------Variables--------------------------//
 	//min-max values of the touched drawn region (if any)
 	static vector<long double> roi_extremes;
@@ -206,6 +206,11 @@ private:
 
 	static unsigned short last_type;
 
+	//Stores if a touch event ended
+	static int touchEnd;
+
+	//Indicate whereas a button was clicked or not
+	static int button_clicked;
 
 	static void OnMove(long double x, long double y);
 

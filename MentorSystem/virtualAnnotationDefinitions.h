@@ -158,12 +158,12 @@
 
 //Path to the hand strech selected image
 #ifndef HAND_STRETCH_SELECTED_IMAGE_PATH
-#define HAND_STRETCH_SELECTED_IMAGE_PATH "../images/hand_strech_selected.png"
+#define HAND_STRETCH_SELECTED_IMAGE_PATH "../images/hand_stretch_selected.png"
 #endif
 
 //Path to the hand strech shadow image
 #ifndef HAND_STRETCH_SHADOW_IMAGE_PATH
-#define HAND_STRETCH_SHADOW_IMAGE_PATH "../images/hand_strech_shadow.png"
+#define HAND_STRETCH_SHADOW_IMAGE_PATH "../images/hand_stretch_shadow.png"
 #endif
 
 //Path to the hand palpate selected image

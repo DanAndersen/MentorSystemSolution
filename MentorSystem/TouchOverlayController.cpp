@@ -32,7 +32,7 @@ int TouchOverlayController::annotationCounter;
 int TouchOverlayController::selected_annotation_code;
 vector<long double> TouchOverlayController::roi_extremes;
 unsigned short TouchOverlayController::last_type;
-
+int TouchOverlayController::button_clicked;
 bool TouchOverlayController::debugMessagesEnabled = false;
 
 /*
@@ -137,7 +137,7 @@ void TouchOverlayController:: InitFuncOnTG()
 
 	m_pf_on_tges[TG_TOUCH_START] = &TouchOverlayController::OnTG_TouchStart;
 	m_pf_on_tges[TG_DOWN] = &TouchOverlayController::OnTG_Down;
-	//m_pf_on_tges[TG_MOVE] = &TouchOverlayController::OnTG_Move;
+	m_pf_on_tges[TG_MOVE] = &TouchOverlayController::OnTG_Move;
 	//m_pf_on_tges[TG_UP] = &TouchOverlayController::OnTG_Up;
 	m_pf_on_tges[TG_CLICK] = &TouchOverlayController::OnTG_Click;
 
@@ -151,16 +151,18 @@ void TouchOverlayController:: InitFuncOnTG()
 
 	m_pf_on_tges[TG_TOUCH_END] = &TouchOverlayController::OnTG_TouchEnd;
 	
-	m_pf_on_tges[TG_ROTATE_CLOCK] = &TouchOverlayController::OnTG_RotateClock;
-	m_pf_on_tges[TG_ROTATE_ANTICLOCK] = &TouchOverlayController::OnTG_RotateAntiClock;
+	m_pf_on_tges[TG_ROTATE_CLOCKWISE] = &TouchOverlayController::OnTG_RotateClock;
+	m_pf_on_tges[TG_ROTATE_ANTICLOCKWISE] = &TouchOverlayController::OnTG_RotateAntiClock;
 	//m_pf_on_tges[TG_SPLIT_START] = &TouchOverlayController::OnTG_SplitStart;
 	m_pf_on_tges[TG_SPLIT_APART] = &TouchOverlayController::OnTG_SplitApart;
 	m_pf_on_tges[TG_SPLIT_CLOSE] = &TouchOverlayController::OnTG_SplitClose;
 	//m_pf_on_tges[TG_SPLIT_END] = &TouchOverlayController::OnTG_SplitEnd;
-	m_pf_on_tges[TG_NEAR_PARREL_MOVE_UP] = &TouchOverlayController::onTG_NearParrellMoveUp;
-	m_pf_on_tges[TG_NEAR_PARREL_MOVE_DOWN] = &TouchOverlayController::onTG_NearParrellMoveDown;
-	m_pf_on_tges[TG_NEAR_PARREL_MOVE_RIGHT] = &TouchOverlayController::onTG_NearParrellMoveRight;
-	m_pf_on_tges[TG_NEAR_PARREL_MOVE_LEFT] = &TouchOverlayController::onTG_NearParrellMoveLeft;
+	m_pf_on_tges[TG_NEAR_PARALLEL_MOVE_UP] = &TouchOverlayController::onTG_NearParrellMoveUp;
+	m_pf_on_tges[TG_NEAR_PARALLEL_MOVE_DOWN] = &TouchOverlayController::onTG_NearParrellMoveDown;
+	m_pf_on_tges[TG_NEAR_PARALLEL_MOVE_RIGHT] = &TouchOverlayController::onTG_NearParrellMoveRight;
+	m_pf_on_tges[TG_NEAR_PARALLEL_MOVE_LEFT] = &TouchOverlayController::onTG_NearParrellMoveLeft;
+
+	m_pf_on_tges[TG_MULTI_DOWN] = &TouchOverlayController::onTG_MultiTouch;
 }
 
 /*
@@ -331,17 +333,6 @@ void TouchOverlayController:: DefaultOnTG(const TouchGesture & tg,void * call_ob
 
 }
 
-/*
- * Method Overview: Handles the general move gesture events
- * Parameters: Received touch gesture
- * Return: None
- 
-void TouchOverlayController:: OnTG_Move(const TouchGesture & tg,void * call_object)
-{
-	//crear poligono de seleccion en lugar de cuadrado
-	assert(tg.type == TG_MOVE && tg.param_size >= 2);
-}
-
 //NOT USED
 void TouchOverlayController:: OnTG_Up(const TouchGesture & tg,void * call_object)
 {
@@ -434,17 +425,9 @@ void TouchOverlayController:: OnTG_Down(const TouchGesture & tg,void * call_obje
 
 	assert(tg.type == TG_DOWN && tg.param_size >= 2);
 
-	double posX = tg.params[0];
-	double posY = tg.params[1];
-
-	// the click analysis assumes that the incoming click was on a (GUI_MEASURED_RESOLUTION_X, GUI_MEASURED_RESOLUTION_Y) screen
-	// but it may not be. So convert it.
-	posX = posX * (double)GUI_MEASURED_RESOLUTION_X / (double)SERVER_RESOLUTION_X;
-	posY = posY * (double)GUI_MEASURED_RESOLUTION_Y / (double)SERVER_RESOLUTION_Y;
+	cv::Point2d worldSpacePoint = spaceToWorld(tg.params);
 	
-	// input X/Y are in screen-space
-	// we may need to convert to world-space to be able to manipulate annotations the way we want to
-	cv::Point2d worldSpacePoint = myCamera->convertScreenSpaceToWorldSpace(posX, posY);
+	button_clicked = myGUI->clickAnalysis(worldSpacePoint.x,worldSpacePoint.y);
 
 	if(myCommander->getLinesDrawableFlag())
 	{
@@ -465,26 +448,9 @@ void TouchOverlayController:: OnTG_Click(const TouchGesture & tg,void * call_obj
 		std::cout << "OnTG_Click" << std::endl;
 	}
 
-	std::cout << "OnTG_Click" << std::endl;
-
 	assert(tg.type == TG_CLICK);
 
-	double posX = tg.params[0];
-	double posY = tg.params[1];
-
-	// the click analysis assumes that the incoming click was on a (GUI_MEASURED_RESOLUTION_X, GUI_MEASURED_RESOLUTION_Y) screen
-	// but it may not be. So convert it.
-	posX = posX * (double)GUI_MEASURED_RESOLUTION_X / (double)SERVER_RESOLUTION_X;
-	posY = posY * (double)GUI_MEASURED_RESOLUTION_Y / (double)SERVER_RESOLUTION_Y;
-
-	// input X/Y are in screen-space
-	// we may need to convert to world-space to be able to manipulate annotations the way we want to
-	cv::Point2d worldSpacePoint = myCamera->convertScreenSpaceToWorldSpace(posX, posY);
-
-
-	int button_clicked = myGUI->clickAnalysis(posX,posY);
-
-	std::cout << "button_clicked: " << button_clicked << std::endl;
+	cv::Point2d worldSpacePoint = spaceToWorld(tg.params);
 
 	if(!button_clicked)
 	{
@@ -515,10 +481,10 @@ void TouchOverlayController:: OnTG_Click(const TouchGesture & tg,void * call_obj
 				}
 			}
 			//Checks if the annotations panel was clicked
-			if (myCommander->getAnnotationPanelShownFlag() && (int)posX < OPEN_PANEL_TAB_MIN_X 
-				&& (int)posY > CLOSED_PANEL_TAB_MAX_X)
+			if (myCommander->getAnnotationPanelShownFlag() && (int)worldSpacePoint.x < OPEN_PANEL_TAB_MIN_X 
+				&& (int)worldSpacePoint.y > CLOSED_PANEL_TAB_MAX_X)
 			{
-				int touchedAnnotationId = myGUI->touchedAnnotationIdentification(posX,posY);
+				int touchedAnnotationId = myGUI->touchedAnnotationIdentification(worldSpacePoint.x,worldSpacePoint.y);
 
 				if (touchedAnnotationId > 0) {
 					selected_annotation_code = touchedAnnotationId;
@@ -527,6 +493,7 @@ void TouchOverlayController:: OnTG_Click(const TouchGesture & tg,void * call_obj
 
 					myCommander->setLinesDrawableFlag(0);
 					myCommander->setPointsDrawableFlag(0);
+					//myCommander->setRoiDrawnFlag(0);
 				}
 			}
 			//Checks if it is on draw points mode
@@ -552,15 +519,39 @@ void TouchOverlayController:: OnTG_Click(const TouchGesture & tg,void * call_obj
 	last_type = tg.type;
 }
 
+/*
+ * Method Overview: Handles the general move gesture events
+ * Parameters: Received touch gesture
+ * Return: None
+ */
+void TouchOverlayController:: OnTG_Move(const TouchGesture & tg,void * call_object)
+{
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "OnMove" << std::endl;
+	}
 
+	assert(tg.type == TG_MOVE && tg.param_size >= 2);
 
+	cv::Point2d worldSpacePoint = spaceToWorld(tg.params);
+
+	//if(!button_clicked)
+	//{
+		if (myCommander->getLinesDrawableFlag())
+		{
+			myCommander->setLineDrawnFlag(1);
+			OpenGLtouchControls(ADD_POINT, annotationCounter, worldSpacePoint.x, worldSpacePoint.y);
+		}
+	//}
+}
+/*
 void TouchOverlayController::OnMove(long double x, long double y) {
 
 	if (TouchOverlayController::debugMessagesEnabled) {
 		std::cout << "OnMove" << std::endl;
 	}
 
-
+	std::cout << "moving moving, moving moving (8)" << std::endl;
+	
 	// input X/Y are in screen-space
 	// we need to convert to world-space to be able to manipulate annotations the way we want to
 	cv::Point2d worldSpacePoint = myCamera->convertScreenSpaceToWorldSpace(x, y);
@@ -580,11 +571,7 @@ void TouchOverlayController::OnMove(long double x, long double y) {
 		roi_extremes.push_back(worldSpacePoint.y);
 	}
 }
-
-
-
-
-
+*/
 /*
  * Method Overview: Handles the received move_right events
  * Parameters: Received touch gesture
@@ -598,20 +585,17 @@ void TouchOverlayController:: OnTG_MoveRight(const TouchGesture & tg,void * call
 
 	assert(tg.type == TG_MOVE_RIGHT);
 
-	double posX = tg.params[0];
-	double posY = tg.params[1];
+	cv::Point2d worldSpacePoint = spaceToWorld(tg.params);
 
-	// the click analysis assumes that the incoming click was on a (GUI_MEASURED_RESOLUTION_X, GUI_MEASURED_RESOLUTION_Y) screen
-	// but it may not be. So convert it.
-	posX = posX * (double)GUI_MEASURED_RESOLUTION_X / (double)SERVER_RESOLUTION_X;
-	posY = posY * (double)GUI_MEASURED_RESOLUTION_Y / (double)SERVER_RESOLUTION_Y;
+	if (!(myCommander->getLinesDrawableFlag()))
+	{
+		myCommander->setRoiDrawnFlag(1);
+		roi_extremes.push_back(worldSpacePoint.x);
+		roi_extremes.push_back(worldSpacePoint.y);
+	}
 
-	OnMove((long double)posX, (long double)posY);
 	last_type = tg.type;
 }
-
-
-
 
 
 /*
@@ -627,15 +611,14 @@ void TouchOverlayController:: OnTG_MoveLeft(const TouchGesture & tg,void * call_
 
 	assert(tg.type == TG_MOVE_LEFT);
 
-	double posX = tg.params[0];
-	double posY = tg.params[1];
+	cv::Point2d worldSpacePoint = spaceToWorld(tg.params);
 
-	// the click analysis assumes that the incoming click was on a (GUI_MEASURED_RESOLUTION_X, GUI_MEASURED_RESOLUTION_Y) screen
-	// but it may not be. So convert it.
-	posX = posX * (double)GUI_MEASURED_RESOLUTION_X / (double)SERVER_RESOLUTION_X;
-	posY = posY * (double)GUI_MEASURED_RESOLUTION_Y / (double)SERVER_RESOLUTION_Y;
-
-	OnMove((long double)posX, (long double)posY);
+	if (!(myCommander->getLinesDrawableFlag()))
+	{
+		myCommander->setRoiDrawnFlag(1);
+		roi_extremes.push_back(worldSpacePoint.x);
+		roi_extremes.push_back(worldSpacePoint.y);
+	}
 	last_type = tg.type;
 }
 
@@ -652,15 +635,14 @@ void TouchOverlayController:: OnTG_MoveDown(const TouchGesture & tg,void * call_
 
 	assert(tg.type == TG_MOVE_DOWN);
 	
-	double posX = tg.params[0];
-	double posY = tg.params[1];
+	cv::Point2d worldSpacePoint = spaceToWorld(tg.params);
 
-	// the click analysis assumes that the incoming click was on a (GUI_MEASURED_RESOLUTION_X, GUI_MEASURED_RESOLUTION_Y) screen
-	// but it may not be. So convert it.
-	posX = posX * (double)GUI_MEASURED_RESOLUTION_X / (double)SERVER_RESOLUTION_X;
-	posY = posY * (double)GUI_MEASURED_RESOLUTION_Y / (double)SERVER_RESOLUTION_Y;
-
-	OnMove((long double)posX, (long double)posY);
+	if (!(myCommander->getLinesDrawableFlag()))
+	{
+		myCommander->setRoiDrawnFlag(1);
+		roi_extremes.push_back(worldSpacePoint.x);
+		roi_extremes.push_back(worldSpacePoint.y);
+	}
 	last_type = tg.type;
 }
 
@@ -677,15 +659,14 @@ void TouchOverlayController:: OnTG_MoveUp(const TouchGesture & tg,void * call_ob
 
 	assert(tg.type == TG_MOVE_UP);
 	
-	double posX = tg.params[0];
-	double posY = tg.params[1];
+	cv::Point2d worldSpacePoint = spaceToWorld(tg.params);
 
-	// the click analysis assumes that the incoming click was on a (GUI_MEASURED_RESOLUTION_X, GUI_MEASURED_RESOLUTION_Y) screen
-	// but it may not be. So convert it.
-	posX = posX * (double)GUI_MEASURED_RESOLUTION_X / (double)SERVER_RESOLUTION_X;
-	posY = posY * (double)GUI_MEASURED_RESOLUTION_Y / (double)SERVER_RESOLUTION_Y;
-
-	OnMove((long double)posX, (long double)posY);
+	if (!(myCommander->getLinesDrawableFlag()))
+	{
+		myCommander->setRoiDrawnFlag(1);
+		roi_extremes.push_back(worldSpacePoint.x);
+		roi_extremes.push_back(worldSpacePoint.y);
+	}
 	last_type = tg.type;
 }
 
@@ -702,9 +683,9 @@ void TouchOverlayController:: OnTG_TouchEnd(const TouchGesture & tg,void * call_
 
 	assert(tg.type == TG_TOUCH_END);
 	
-	if(last_type == TG_ROTATE_CLOCK || last_type == TG_ROTATE_ANTICLOCK || last_type == TG_SPLIT_APART || 
-		last_type == TG_SPLIT_CLOSE || last_type == TG_NEAR_PARREL_MOVE_RIGHT || last_type == TG_NEAR_PARREL_MOVE_LEFT || 
-		last_type == TG_NEAR_PARREL_MOVE_UP || last_type == TG_NEAR_PARREL_MOVE_DOWN)
+	if(last_type == TG_ROTATE_CLOCKWISE || last_type == TG_ROTATE_ANTICLOCKWISE || last_type == TG_SPLIT_APART || 
+		last_type == TG_SPLIT_CLOSE || last_type == TG_NEAR_PARALLEL_MOVE_RIGHT || last_type == TG_NEAR_PARALLEL_MOVE_LEFT || 
+		last_type == TG_NEAR_PARALLEL_MOVE_UP || last_type == TG_NEAR_PARALLEL_MOVE_DOWN)
 	{
 		if(myCommander->getVirtualAnnotationSelectedFlag())
 		{
@@ -757,7 +738,7 @@ void TouchOverlayController::OnTG_RotateClock(const TouchGesture & tg,void * cal
 		std::cout << "OnTG_RotateClock" << std::endl;
 	}
 
-	assert(tg.type == TG_ROTATE_CLOCK);
+	assert(tg.type == TG_ROTATE_CLOCKWISE);
 	
 	if(myCommander->getVirtualAnnotationSelectedFlag())
 	{
@@ -782,7 +763,7 @@ void TouchOverlayController::OnTG_RotateAntiClock(const TouchGesture & tg,void *
 		std::cout << "OnTG_RotateAntiClock" << std::endl;
 	}
 
-	assert(tg.type == TG_ROTATE_ANTICLOCK);
+	assert(tg.type == TG_ROTATE_ANTICLOCKWISE);
 	
 	if(myCommander->getVirtualAnnotationSelectedFlag())
 	{
@@ -857,7 +838,7 @@ void TouchOverlayController::onTG_NearParrellMoveRight(const TouchGesture & tg,v
 		std::cout << "onTG_NearParrellMoveRight" << std::endl;
 	}
 
-	assert(tg.type == TG_NEAR_PARREL_MOVE_RIGHT);
+	assert(tg.type == TG_NEAR_PARALLEL_MOVE_RIGHT);
 	
 	if(myCommander->getVirtualAnnotationSelectedFlag())
 	{
@@ -882,7 +863,7 @@ void TouchOverlayController::onTG_NearParrellMoveLeft(const TouchGesture & tg,vo
 		std::cout << "onTG_NearParrellMoveLeft" << std::endl;
 	}
 
-	assert(tg.type == TG_NEAR_PARREL_MOVE_LEFT);
+	assert(tg.type == TG_NEAR_PARALLEL_MOVE_LEFT);
 	
 	if(myCommander->getVirtualAnnotationSelectedFlag())
 	{
@@ -908,7 +889,7 @@ void TouchOverlayController::onTG_NearParrellMoveUp(const TouchGesture & tg,void
 		std::cout << "onTG_NearParrellMoveUp" << std::endl;
 	}
 
-	assert(tg.type == TG_NEAR_PARREL_MOVE_UP);
+	assert(tg.type == TG_NEAR_PARALLEL_MOVE_UP);
 
 	if(myCommander->getVirtualAnnotationSelectedFlag())
 	{
@@ -933,7 +914,7 @@ void TouchOverlayController::onTG_NearParrellMoveDown(const TouchGesture & tg,vo
 		std::cout << "onTG_NearParrellMoveDown" << std::endl;
 	}
 
-	assert(tg.type == TG_NEAR_PARREL_MOVE_DOWN);
+	assert(tg.type == TG_NEAR_PARALLEL_MOVE_DOWN);
 	
 	if(myCommander->getVirtualAnnotationSelectedFlag())
 	{
@@ -945,4 +926,45 @@ void TouchOverlayController::onTG_NearParrellMoveDown(const TouchGesture & tg,vo
 	}
 
 	last_type = tg.type;
+}
+
+/*
+ * Method Overview: Handles the received multi touch events
+ * Parameters: Received multi touch gesture
+ * Return: None
+ */
+void TouchOverlayController::onTG_MultiTouch(const TouchGesture & tg,void * call_object)
+{
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "onTG_NearParrellMoveDown" << std::endl;
+	}
+
+	std::cout << "Multi Touch event" << std::endl;
+	std::cout << tg.param_size << std::endl;
+	const double* data = tg.params;
+	std::cout << data[0] << std::endl;
+	std::cout << data[1] << std::endl;
+	std::cout << data[2] << std::endl;
+	std::cout << data[3] << std::endl;
+	std::cout << data[4] << std::endl;
+	std::cout << data[5] << std::endl;
+
+	last_type = tg.type;
+}
+
+cv::Point2d TouchOverlayController::spaceToWorld(const double* spaceCoord)
+{
+	double posX = spaceCoord[0];
+	double posY = spaceCoord[1];
+
+	// the click analysis assumes that the incoming click was on a (GUI_MEASURED_RESOLUTION_X, GUI_MEASURED_RESOLUTION_Y) screen
+	// but it may not be. So convert it.
+	posX = posX * (double)GUI_MEASURED_RESOLUTION_X / (double)SERVER_RESOLUTION_X;
+	posY = posY * (double)GUI_MEASURED_RESOLUTION_Y / (double)SERVER_RESOLUTION_Y;
+	
+	// input X/Y are in screen-space
+	// we need to convert to world-space to be able to manipulate annotations the way we want to
+	cv::Point2d worldSpacePoint = myCamera->convertScreenSpaceToWorldSpace(posX, posY);
+
+	return worldSpacePoint;
 }

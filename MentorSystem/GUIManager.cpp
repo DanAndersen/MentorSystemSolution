@@ -20,7 +20,6 @@
 #include "GUIManager.h"
 #include "Config.h"
 
-
 //--------------------------Definitions--------------------------//
 #define PI 3.14159265358979323846
 
@@ -241,44 +240,60 @@ int GUIManager::touchedAnnotationIdentification(double posX, double posY)
 	if(posY>FIRST_ROW_UPPER_MARGIN && posY<FIRST_ROW_LOWER_MARGIN)
 	{
 		code = FIRST_ROW_CODE;
+		rowIdentifier = FIRST_ROW_LOWER_MARGIN+1;
 	}
 	else if(posY>SECOND_ROW_UPPER_MARGIN && posY<SECOND_ROW_LOWER_MARGIN)
 	{
-		code = SECOND_ROW_CODE;
+		code = SECOND_ROW_CODE; 
+		rowIdentifier = SECOND_ROW_LOWER_MARGIN+1;
 	}
 	else if(posY>THIRD_ROW_UPPER_MARGIN && posY<THIRD_ROW_LOWER_MARGIN)
 	{
 		code = THIRD_ROW_CODE;
+		rowIdentifier = THIRD_ROW_LOWER_MARGIN;
 	}
 	else if(posY>FOURTH_ROW_UPPER_MARGIN && posY<FOURTH_ROW_LOWER_MARGIN)
 	{
 		code = FOURTH_ROW_CODE;
+		rowIdentifier = FOURTH_ROW_LOWER_MARGIN+1;
 	}
 	else if(posY>FIFTH_ROW_UPPER_MARGIN && posY<FIFTH_ROW_LOWER_MARGIN)
 	{
 		code = FIFTH_ROW_CODE;
+		rowIdentifier = FIFTH_ROW_LOWER_MARGIN+1;
 	}
 	else if(posY>SIXTH_ROW_UPPER_MARGIN && posY<SIXTH_ROW_LOWER_MARGIN)
 	{
 		code = SIXTH_ROW_CODE;
+		rowIdentifier = SIXTH_ROW_LOWER_MARGIN+1;
 	}
 	else if(posY>SEVENTH_ROW_UPPER_MARGIN && posY<SEVENTH_ROW_LOWER_MARGIN)
 	{
 		code = SEVENTH_ROW_CODE;
+		rowIdentifier = SEVENTH_ROW_LOWER_MARGIN+1;
 	}
 
 	//Determines which column was clicked
 	if(posX>FIRST_COLUMN_LEFT_MARGIN && posX<FIRST_COLUMN_RIGHT_MARGIN)
 	{
 		code *= FIRST_COLUMN_CODE;
+		columnIdentifier = FIRST_COLUMN_LEFT_MARGIN;
 	}
 	else if(posX>SECOND_COLUMN_LEFT_MARGIN && posX<SECOND_COLUMN_RIGHT_MARGIN)
 	{
 		code *= SECOND_COLUMN_CODE;
+		columnIdentifier = SECOND_COLUMN_LEFT_MARGIN;
 	}
 	else if(posX>THIRD_COLUMN_LEFT_MARGIN && posX<THIRD_COLUMN_RIGHT_MARGIN)
 	{
 		code *= THIRD_COLUMN_CODE;
+		columnIdentifier = THIRD_COLUMN_LEFT_MARGIN;
+	}
+
+	//Check if it the not annotation space in the panel
+	if(code == 63)
+	{
+		code = 0;
 	}
 
 	return code;
@@ -434,6 +449,7 @@ void GUIManager::initImages()
 	ButtonExit = cv::imread(BUTTON_EXIT_PATH,-1);
 	AnnotationPanel = cv::imread(ANNOTATION_PANEL_PATH,-1);
 	AnnotationPanelHidden = cv::imread(ANNOTATION_PANEL_HIDDEN_PATH,-1);
+	SelectedSquare = cv::imread(SELECTED_PANEL_SQUARE_PATH,-1);
 }
 
 /*
@@ -498,6 +514,12 @@ cv::Mat GUIManager::overlayAnnotations(cv::Mat GUIImage)
 	cv::Mat tempResult = GUIImage;
 	cv::Mat finalResult = GUIImage;
 	long double coordinateX, coordinateY;
+
+	if(myCommander->getVirtualAnnotationCreationFlag())
+	{
+		overlayImage(tempResult,SelectedSquare, finalResult, cv::Point((int)columnIdentifier, 
+				resolutionY-(int)rowIdentifier));
+	}
 
 	cv::Mat image_to_show;
 

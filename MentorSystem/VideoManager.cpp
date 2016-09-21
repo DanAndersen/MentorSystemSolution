@@ -272,9 +272,9 @@ void VideoManager::initWindow()
 		*/
 
 		//// Read Gesture client data
-		cout << "BEFORE READING FROM GESTURE CLIENT" << endl;
+		//cout << "BEFORE READING FROM GESTURE CLIENT" << endl;
 		int gesture_data_length = myServer->receiveFromClients(gestureData, gestureBuffSize, GESTURE_NETWORK_CODE);
-		cout << "AFTER READOMG FROM GESTURE CLIENT" << endl;
+		//cout << "AFTER READOMG FROM GESTURE CLIENT" << endl;
 		if (gesture_data_length <= 0){
 			//nodata or incomplete data
 			continue;

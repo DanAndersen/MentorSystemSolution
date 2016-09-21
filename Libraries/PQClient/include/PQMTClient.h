@@ -12,10 +12,10 @@
 //
 //----------------------------------------------------------------------------
 
-// The following ifdef block is the standard way of creating macros which make exporting 
+// The following ifdef block is the standard way of creating macros which make exporting
 // from a DLL simpler. All files within this DLL are compiled with the PQ_MULTITOUCH_CLIENT_EXPORTS
 // symbol defined on the command line. this symbol should not be defined on any project
-// that uses this DLL. This way any other project whose source files include this file see 
+// that uses this DLL. This way any other project whose source files include this file see
 // PQMT_CLIENT_API functions as being imported from a DLL, whereas this DLL sees symbols
 // defined with this macro as being exported.
 #if defined(WIN32) || defined(_WIN64)
@@ -25,28 +25,31 @@
 #define PQMT_CLIENT_API __declspec(dllimport)
 #endif
 #else
+#ifdef PQ_MULTITOUCH_CLIENT_EXPORTS
+#define PQMT_CLIENT_API __attribute__((visibility("default")))
+#else
 #define PQMT_CLIENT_API
+#endif //EXPORT
 #endif
 
 #ifndef PQMT_CLIENT_H_
 #define PQMT_CLIENT_H_
 // for window ide
-#ifdef _WINDOWS
+#ifdef _WIN32
 #include <guiddef.h>
 // others os
-#else 
-
+#else //not _WIN32
 #ifndef GUID_DEFINED
 #define GUID_DEFINED
-typedef PQMT_CLIENT_API struct{
-    unsigned long  Data1;
+typedef struct{
+    unsigned long Data1;
     unsigned short Data2;
     unsigned short Data3;
-    unsigned char  Data4[ 8 ];
-} GUID;
-#endif
+    unsigned char Data4[8];
+}GUID;
+#endif //not def GUID;
+#endif //WINDOWS
 
-#endif
 
 namespace PQ_SDK_MultiTouch
 {
@@ -54,22 +57,34 @@ namespace PQ_SDK_MultiTouch
 #ifdef  __cplusplus
 extern "C"{
 #endif
-#define PQ_MT_CLIENT_VERSION	(0x0103)
+#define PQ_MT_CLIENT_VERSION	(0x0205)
 
 #define PQMTE_SUCCESS			(0)
 #define PQMTE_RCV_INVALIDATE_DATA				(0x31000001) // the data received is invalidate,
 													 //	may be the client receive the data from other application but pqmtserver;
 #define PQMTE_SERVER_VERSION_OLD				(0x31000002) // the pqmtserver is too old for this version of client.
 #define PQMTE_EXCEPTION_FROM_CALLBACKFUNCTION	(0x31000003) // some exceptions thrown from the call back functions;
+#define PQMTE_RECEIVE_CACHE_OVERFLOW			(0x31000004) // the cache of receive thread is overflow
 
 //
 #define PQMT_DEFAULT_CLIENT_PORT	(21555)
+//server version check
+#define PQMT_MIN_SERVER_MAJOR_FOR_DEVICEINFOEX	(4)		  
+#define PQMT_MIN_SERVER_MINOR_FOR_DEVICEINFOEX	(1507)   
 
 // point_event of TouchPoint
 #define TP_DOWN		(0)
 #define TP_MOVE		(1)
 #define TP_UP		(2)
 //
+// type of TouchPoint
+#define POINT_TYPE_TOUCH		(0)
+#define POINT_TYPE_PASSIVE_PEN	(1)
+#define POINT_TYPE_ACTIVE_PEN	(2)
+#define POINT_TYPE_ERASER		(4)
+#define POINT_TYPE_ACTIVE_ERASER (POINT_TYPE_ERASER | POINT_TYPE_ACTIVE_PEN) //(6)
+
+
 //The raw touch point received from the server.
 struct PQMT_CLIENT_API TouchPoint
 {
@@ -79,6 +94,9 @@ struct PQMT_CLIENT_API TouchPoint
 	int				y;			//the y-coordinate of the center position of the point.In pixels.
 	unsigned short	dx;		    //the x-width of the touch point.In pixels.
 	unsigned short	dy;			//the y-width of the touch point.In pixels.
+	int				type;		// bit combine POINT_TYPE_TOUCH 
+	float			pressure;
+	int				timeStamp;
 };
 
 // MAX_TG_PARAM_SIZE: max size of touch gesture params
@@ -106,7 +124,7 @@ struct PQMT_CLIENT_API TouchPoint
 
 // second point
 #define TG_SECOND_DOWN				(0x0019)
-#define TG_SECOND_UP				(0x001a) 
+#define TG_SECOND_UP				(0x001a)
 #define TG_SECOND_CLICK				(0x001b)
 #define TG_SECOND_DB_CLICK          (0x001c)
 
@@ -118,21 +136,21 @@ struct PQMT_CLIENT_API TouchPoint
 
 // rotate
 #define TG_ROTATE_START				(0x0024)
-#define TG_ROTATE_ANTICLOCK			(0x0025)
-#define TG_ROTATE_CLOCK				(0x0026)
+#define TG_ROTATE_ANTICLOCKWISE  	(0x0025)
+#define TG_ROTATE_CLOCKWISE			(0x0026)
 #define TG_ROTATE_END				(0x0027)
 
-// near parrel
-#define TG_NEAR_PARREL_DOWN			(0x0028)
-#define TG_NEAR_PARREL_MOVE			(0x002d)
-#define TG_NEAR_PARREL_UP			(0x002e)
-#define TG_NEAR_PARREL_CLICK		(0x002f)
-#define TG_NEAR_PARREL_DB_CLICK		(0x0030)
+// near parallel
+#define TG_NEAR_PARALLEL_DOWN		(0x0028)
+#define TG_NEAR_PARALLEL_MOVE		(0x002d)
+#define TG_NEAR_PARALLEL_UP			(0x002e)
+#define TG_NEAR_PARALLEL_CLICK		(0x002f)
+#define TG_NEAR_PARALLEL_DB_CLICK	(0x0030)
 
-#define TG_NEAR_PARREL_MOVE_RIGHT	(0x0031)
-#define TG_NEAR_PARREL_MOVE_UP		(0x0032)
-#define TG_NEAR_PARREL_MOVE_LEFT	(0x0033)
-#define TG_NEAR_PARREL_MOVE_DOWN	(0x0034)
+#define TG_NEAR_PARALLEL_MOVE_RIGHT	(0x0031)
+#define TG_NEAR_PARALLEL_MOVE_UP	(0x0032)
+#define TG_NEAR_PARALLEL_MOVE_LEFT	(0x0033)
+#define TG_NEAR_PARALLEL_MOVE_DOWN	(0x0034)
 
 // multi points
 #define TG_MULTI_DOWN				(0x0035)
@@ -144,7 +162,7 @@ struct PQMT_CLIENT_API TouchPoint
 #define TG_MULTI_MOVE_LEFT			(0x003e)
 #define TG_MULTI_MOVE_DOWN			(0x003f)
 
-// 
+//
 #define TG_TOUCH_END				(0x0080)
 #define TG_NO_ACTION				(0xffff)
 //
@@ -159,12 +177,20 @@ struct PQMT_CLIENT_API TouchGesture{
 #define RQST_RAWDATA_INSIDE_ONLY	(0x00)
 //
 #define RQST_RAWDATA_INSIDE			(0x01)		// the server will send the raw touch points to this client application
-												// when the first finger are touching in the client windows. 
+												// when the first finger are touching in the client windows.
 
 #define RQST_RAWDATA_ALL			(0x02)		// server will send all raw touch points to this client.
-#define RQST_GESTURE_INSIDE			(0x04) 
-#define RQST_GESTURE_ALL			(0x08) 
+#define RQST_GESTURE_INSIDE			(0x04)
+#define RQST_GESTURE_ALL			(0x08)
 #define RQST_TRANSLATOR_CONFIG	    (0x10)		// reserved
+
+
+#define	TOUCHDEVICE_STATE_CONNECTED		(0x0)
+#define TOUCHDEVICE_STATE_DISCONNECTED	(0x1)  //notified when device is plug-out. The disconnected state may be notified more than once in one plug-out.
+
+#define TOUCHDEVICE_TYPE_GENERAL		(0x0)	//one physical touch screen to one display.
+#define TOUCHDEVICE_TYPE_MULTIDISPLAY	(0x1)	//one physical touch screen seperated to multiple "logic_sub" touch screens;
+#define TOUCHDEVICE_TYPE_COMPOSITE		(0x2)	//several physical touch screen composite of a large "logic" touch screen;
 
 
 struct PQMT_CLIENT_API TouchClientRequest{
@@ -174,10 +200,32 @@ struct PQMT_CLIENT_API TouchClientRequest{
 	char			param[128];	//If type is RQST_TRANSLATOR_CONFIG,it is the name of gesture translator which will be queired from the server configure tools.Otherwise it is reserved.
 };
 
+//TouchDeviceInfo: deprecated since PQ_MT_CLIENT_VERSION >= 0x0205, replace with TouchDeviceInfoEx
 struct PQMT_CLIENT_API TouchDeviceInfo{
 	int				screen_width;				//the physical touchable width of touch screen device, in millimeter
 	int				screen_height;				//the physical touchabel height of touch screen device, in millimeter
 	char			serial_number[128];			//the serial number of touch screen device
+};
+
+struct PQMT_CLIENT_API TouchDeviceInfoEx{
+	unsigned char	state;						//TOUCHDEVICE_STATE_*, 
+												// **** when state is TOUCHDEVICE_STATE_DISCONNECTED, the serial_number is validate, other members may be invalidate.
+	unsigned char	type;						//TOUCHDEVICE_TYPE_*
+	unsigned short  reserved_padding;			//reserved;
+
+	char			serial_number[128];			//the serial number of touch screen device
+	int				screen_width;				//the physical touchable width of touch screen device, in millimeter
+	int				screen_height;				//the physical touchabel height of touch screen device, in millimeter
+
+	unsigned char	row;						//when type is TOUCHDEVICETYPE_COMPOSITE, specify the row postion of this screen in the whole "logic" composite screen, start from "0";
+												// otherwise, it's "0".
+	unsigned char	col;
+	unsigned char	total_row;					//when type is TOUCHDEVICETYPE_COMPOSITE, specify the total row count of physical screens;
+												//when type is TOUCHDEVICETYPE_MULTIDISPLAY, specify the total row count of "logic_sub" screens;
+												//otherwise, it's "1";
+	unsigned char	total_col;
+	int				reserved_1;					//reserved
+	int				reserved_2;					
 };
 
 // PFuncOnReceivePointFrame
@@ -187,20 +235,20 @@ struct PQMT_CLIENT_API TouchDeviceInfo{
 //	and the leaving touch point with its pointevent being TP_UP will be always sent from server;
 typedef
 PQMT_CLIENT_API
-void 
+void
 (*PFuncOnReceivePointFrame)(
 	int					frame_id,			// the id of this frame
 	int					time_stamp,         // time stamp
 	int					point_count,        // size of point_array
 	const TouchPoint *	point_array,        // touch points array
-	void *				call_back_object    
+	void *				call_back_object
 	);
 
 // PFuncOnReceiveGesture
 //	the action you want to take when receive the TouchGesture
 typedef
 PQMT_CLIENT_API
-void 
+void
 (*PFuncOnReceiveGesture)(
 	const TouchGesture &	gesture,
 	void *					call_back_object
@@ -210,7 +258,7 @@ void
 //	the action you want to take when server interrupt the connection.
 typedef
 PQMT_CLIENT_API
-void 
+void
 (*PFuncOnServerBreak)(
 	void * param,
 	void * call_back_object
@@ -220,7 +268,7 @@ void
 //  there may occur some network error while inter-communicate with the server, handle them here.
 typedef
 PQMT_CLIENT_API
-void 
+void
 (*PFuncOnReceiveError)(
 	int		error_code,
 	void *	call_back_object
@@ -228,6 +276,8 @@ void
 
 // PFuncOnGetServerResolution
 // call back function of getting the display resolution of the server system, attention: not the resolution of touch screen.
+//  the resolution may change when touch screen with different type (TOUCHDEVICE_TYPE_*) is plug-in,
+//  when the resolution changed, client will get the notification by this call back;
 typedef
 PQMT_CLIENT_API
 void
@@ -237,19 +287,36 @@ void
 	void *	call_back_object
 	);
 
-// PFuncOnGetDeviceInfo 
+// PFuncOnGetDeviceInfo
 //	call back function of getting the information of the device.
+//	deprecated since PQ_MT_CLIENT_VERSION >= 0x0205, replace with PFuncOnGetDeviceInfoEx
 typedef
 PQMT_CLIENT_API
 void
 (*PFuncOnGetDeviceInfo)(
-	const TouchDeviceInfo & deviceinfo,	
+	const TouchDeviceInfo & deviceinfo,
 	void *					call_back_object
 	);
 
-// ConnectServer: 
+typedef
+PQMT_CLIENT_API
+void
+(*PFuncOnGetDeviceInfoEx)(
+	const TouchDeviceInfoEx & deviceinfo,
+	void *					call_back_object
+	);
+
+typedef
+PQMT_CLIENT_API
+void
+(*PFuncOnGetVersion)(
+	int major, int minor, int release, int build,
+	void *					call_back_object
+	);
+
+// ConnectServer:
 //  Connect the multi-touch server.
-PQMT_CLIENT_API 
+PQMT_CLIENT_API
 int
 ConnectServer(
 	const char *	ip = "127.0.0.1",					//the ip of server, default as for local machine;
@@ -259,16 +326,16 @@ ConnectServer(
 // SendRequest:
 //	After connect the multi-touch server successfully, send your request to the server.
 //	The request tell the server which service you'd like to enjoy.
-PQMT_CLIENT_API 
-int 
+PQMT_CLIENT_API
+int
 SendRequest(
 	const TouchClientRequest & request //request information to send to the server. RQST_RAWDATA_INSIDE etc.
 	);
 
 // SendThreshold:
 // only for request type RQST_RAWDATA_INSIDE(see SendRequest)
-PQMT_CLIENT_API 
-int 
+PQMT_CLIENT_API
+int
 SendThreshold(
 	int move_threshold		//	it is the move threshold that will filter some points not move(the moving distance < threshold);
 							//	it is in pixel(the pixel in the coordinate of server);
@@ -278,18 +345,35 @@ SendThreshold(
 // SetRawDataResolution
 //	set the resolution of the raw data(touch points);
 PQMT_CLIENT_API
-int	
+int
 SetRawDataResolution(
 	int max_x,
 	int max_y
 	);
 
 // GetServerResolution:
-//	to get the display resolution of the server system, attention: not the resolution of touch screen.
+// deprecated since PQ_MT_CLIENT_VERSION >= 0x0205, replace with SetOnGetServerResolution
+//	to get the display resolution of the server system, attention: not the resolution of touch screen;
+// server resolution is not affected by SetRawDataResolution;
 PQMT_CLIENT_API
 int
 GetServerResolution(
 	PFuncOnGetServerResolution	pFnCallback,
+	void *						call_back_object
+	);
+
+PQMT_CLIENT_API
+PFuncOnGetServerResolution
+SetOnGetServerResolution(
+	PFuncOnGetServerResolution	pFnCallback,
+	void *						call_back_object
+	);
+
+// SetOnGetVersion, need to be set before ConnectServer
+PQMT_CLIENT_API
+void
+SetOnGetVersion(
+	PFuncOnGetVersion			pFnCallback,
 	void *						call_back_object
 	);
 
@@ -333,7 +417,7 @@ SetOnServerBreak(
 // SetOnReceiveError:
 //  Set the function that you want to execute while some errors occur during the receive process.
 PQMT_CLIENT_API
-PFuncOnReceiveError 
+PFuncOnReceiveError
 SetOnReceiveError(
 	PFuncOnReceiveError			pf_on_rcv_error,
 	void *						call_back_object
@@ -341,8 +425,9 @@ SetOnReceiveError(
 
 //SetOnGetDeviceInfo
 // the device information will be sent after the client SendRequest to server,
-// or when the device plug in/out;
+// or when the device plug in;
 // Set the function that you want to execute while the client wants the device information
+// deprecated since PQ_MT_CLIENT_VERSION >= 0x0205, replace with SetOnGetDeviceInfoEx
 PQMT_CLIENT_API
 PFuncOnGetDeviceInfo
 SetOnGetDeviceInfo(
@@ -350,10 +435,17 @@ SetOnGetDeviceInfo(
 	void *						call_back_object
 	);
 
+PQMT_CLIENT_API
+PFuncOnGetDeviceInfoEx
+SetOnGetDeviceInfoEx(
+	PFuncOnGetDeviceInfoEx		pf_on_get_device_info,
+	void *						call_back_object
+	);
+
 // GetGestureName:
 //	Get the touch gesture name of the touch gesture.
 PQMT_CLIENT_API
-const char * 
+const char *
 GetGestureName(
 	const TouchGesture & tg
 	);

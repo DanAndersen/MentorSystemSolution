@@ -991,7 +991,7 @@ void motion(int x, int y) {
 
 		tg.type = TG_MOVE_LEFT;	// TODO, don't need to say left, but any direction should do
 
-		TouchOverlayController::OnTG_MoveLeft(tg, NULL);
+		TouchOverlayController::OnTG_Move(tg, NULL);
 	}
 }
 
@@ -1044,7 +1044,7 @@ void mouse(int button, int state, int x, int y) {
 		{
 			std::cout << "Mouse: Right button up" << std::endl;
 
-			tg.type = TG_ROTATE_CLOCK;
+			tg.type = TG_ROTATE_CLOCKWISE;
 			TouchOverlayController::OnTG_RotateClock(tg, NULL);
 
 			tg.type = TG_TOUCH_END;

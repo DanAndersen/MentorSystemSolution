@@ -110,13 +110,16 @@ private:
 	cv::Mat ButtonPointsOn, ButtonPointsOff, ButtonLinesOn, ButtonLinesOff, ButtonClearAll, ButtonErase, ButtonExit;
 
 	//Matrices to store the annotation panels
-	cv::Mat AnnotationPanel, AnnotationPanelHidden;
+	cv::Mat AnnotationPanel, AnnotationPanelHidden, SelectedSquare;
 
 	//Matrices to store the temporal and final results
 	cv::Mat tempResult, finalResult;
 
 	//Screen resolution
 	int resolutionX, resolutionY;
+
+	//Selected row and column identifies
+	int rowIdentifier, columnIdentifier;
 
 	//Instance of the general program flow controller
 	CommandCenter* myCommander;
