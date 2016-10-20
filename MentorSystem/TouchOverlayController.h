@@ -31,6 +31,8 @@
 #include <iostream>//Input/Output Functions
 #include <sstream>//String Stream Functions
 #include <vector>////Enable the usage of the vector class
+#include <cmath>//General C math functions
+#include "Config.h"
 #include "CameraManager.h"
 #include "PQMTClient.h"//PQLabs Libraries
 #include "CommandCenter.h"//General Program Flow Controller
@@ -38,7 +40,6 @@
 #include "GUIManager.h"//Methods used to create the GUI
 #include "GUIDefinitions.h"//Definitions required for the GUI usage
 #include "touchCommands.h"//Touch events standard commands
-
 
 using namespace std;//Standard Libraries
 
@@ -137,20 +138,13 @@ public:
 	//Method to handle the Touch Start event
 	static void OnTG_TouchStart(const TouchGesture & tg, void * call_object);
 
-	//Method to handle the Multi Touch event
-	static void onTG_MultiTouch(const TouchGesture & tg, void * call_object);
+	//Method to handle the Multi Down event
+	static void onTG_MultiDown(const TouchGesture & tg, void * call_object);
+
+	//Method to handle the Multi Move event
+	static void onTG_MultiMove(const TouchGesture & tg, void * call_object);
 
 private:
-
-	// if true, then don't actually use the multitouch system,
-	// just use mouseclicks to simulate functionality for dev purposes
-	bool _mockMode;
-
-	bool isInMockMode();
-
-	//Transforms a point in space coordinates to world coordinates
-	static cv::Point2d spaceToWorld(const double* spaceCoord);
-
 	//-------------------------Methods---------------------------//
 		//----------------Call Back Methods------------------//
 	//Method to handle when recieve touch point frame
@@ -191,9 +185,28 @@ private:
 	//Metthod to handle a default touch gesture event
 	//static void DefaultOnTG(const TouchGesture & tg,void * call_object);
 
+		//--------------Miscellaneous Methods----------------//
+	// if true, then don't actually use the multitouch system,
+	// just use mouseclicks to simulate functionality for dev purposes
+	bool _mockMode;
+
+	bool isInMockMode();
+
+	//Transforms a point in space coordinates to world coordinates
+	static cv::Point2d spaceToWorld(const double* spaceCoord);
+
+	//Find the mean of the coordinate points of real tool placed
+	static double getRealToolMean();
+
 	//------------------------Variables--------------------------//
 	//min-max values of the touched drawn region (if any)
 	static vector<long double> roi_extremes;
+
+	//list of the real object obtained features
+	static vector<double> real_element_features;
+
+	//last multi touch event location
+	static double last_param[2];
 
 	//Counts how many lines have been created
 	static int annotationCounter;
@@ -211,8 +224,6 @@ private:
 
 	//Indicate whereas a button was clicked or not
 	static int button_clicked;
-
-	static void OnMove(long double x, long double y);
 
 };// sample code end
 

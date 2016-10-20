@@ -64,31 +64,47 @@ void LineAnnotation::setInitialExtremes()
  */
 void LineAnnotation::addPoint(long double x, long double y)
 {
-	myPoints.push_back(x);
-	myPoints.push_back(y);
+	int proceed = 1;
 
-	//Checks if x value is lower than min x value
-	if(x<annotation_extremes[0])
+	if (myPoints.size() > 2)
 	{
-		annotation_extremes[0] = x;
-	}
-	//Checks if y value is lower than min y value
-	if(y<annotation_extremes[1])
-	{
-		annotation_extremes[1] = y;
-	}
-	//Checks if x value is higher than max x value
-	if(x>annotation_extremes[2])
-	{
-		annotation_extremes[2] = x;
-	}
-	//Checks if y value is higher than max y value
-	if(y>annotation_extremes[3])
-	{
-		annotation_extremes[3] = y;
+		long double prevX = myPoints.at(myPoints.size() - 2);
+		long double prevY = myPoints.at(myPoints.size() - 1);
+
+		if (abs(prevX - x) < 1.0 && abs(prevY - y) < 1.0)
+		{
+			proceed = 0;
+		}
 	}
 
-	recalculateCenter();
+	if (proceed)
+	{
+		myPoints.push_back(x);
+		myPoints.push_back(y);
+
+		//Checks if x value is lower than min x value
+		if (x < annotation_extremes[0])
+		{
+			annotation_extremes[0] = x;
+		}
+		//Checks if y value is lower than min y value
+		if (y < annotation_extremes[1])
+		{
+			annotation_extremes[1] = y;
+		}
+		//Checks if x value is higher than max x value
+		if (x > annotation_extremes[2])
+		{
+			annotation_extremes[2] = x;
+		}
+		//Checks if y value is higher than max y value
+		if (y > annotation_extremes[3])
+		{
+			annotation_extremes[3] = y;
+		}
+
+		recalculateCenter();
+	}
 }
 
 /*

@@ -434,6 +434,69 @@ void GUIManager::startJSONAnnotationUpdate()
 }
 
 /*
+* Method Overview: Identifies which was the real tool placed
+* Parameters (1): Annotation number, delta between touch points
+* Parameters (2): Position of the right-most touch event
+* Return: None
+*/
+void GUIManager::interpretRealTool(int annotation_counter, double difference, const double* position)
+{
+	//calculate current resolution values
+	double this_hyp = sqrt((SERVER_RESOLUTION_X * SERVER_RESOLUTION_X) + (SERVER_RESOLUTION_Y * SERVER_RESOLUTION_Y));
+	double this_cm_dif = (this_hyp * REF_CM_IN_PIX) / REF_HYP;
+	double this_uncertainty = (this_hyp * REF_PIX_UNCERTAINTY) / REF_HYP;
+
+	//get centimiter per resolution value
+	double cm_dif = difference / this_cm_dif;
+	cout << this_uncertainty << endl;
+	int annotationCode = 0;
+
+	/*if (((SCISSORS_IN_CM - this_uncertainty) < cm_dif && cm_dif < (SCISSORS_IN_CM + this_uncertainty))
+		|| ((2 * SCISSORS_IN_CM - 2 * this_uncertainty) < cm_dif && cm_dif < (2 * SCISSORS_IN_CM + 2 * this_uncertainty)))
+	{
+		annotationCode = SCISSORS_CODE;
+	}*/
+	if (((SCISSORS_IN_CM - this_uncertainty) < cm_dif && cm_dif < (SCISSORS_IN_CM + this_uncertainty))
+		|| ((2 * SCISSORS_IN_CM - this_uncertainty) < cm_dif && cm_dif < (2 * SCISSORS_IN_CM + this_uncertainty)))
+	{
+		annotationCode = SCISSORS_CODE;
+	}
+	else if (((SYRINGE_IN_CM - this_uncertainty) < cm_dif && cm_dif < (SYRINGE_IN_CM + this_uncertainty))
+		|| ((2 * SYRINGE_IN_CM - this_uncertainty) < cm_dif && cm_dif < (2 * SYRINGE_IN_CM + this_uncertainty)))
+	{
+		annotationCode = SYRINGE_CODE;
+	}
+	else if (((TWEEZERS_IN_CM - this_uncertainty) < cm_dif && cm_dif < (TWEEZERS_IN_CM + this_uncertainty))
+		|| ((2 * TWEEZERS_IN_CM - this_uncertainty) < cm_dif && cm_dif < (2 * TWEEZERS_IN_CM + this_uncertainty)))
+	{
+		annotationCode = TWEEZERS_CODE;
+	}
+	else if (((HEMOSTAT_IN_CM - this_uncertainty) < cm_dif && cm_dif < (HEMOSTAT_IN_CM + this_uncertainty)))
+	{
+		annotationCode = HEMOSTAT_CODE;
+	}
+	else if (((SCALPEL_IN_CM - this_uncertainty) < cm_dif && cm_dif < (SCALPEL_IN_CM + this_uncertainty))
+		|| ((2 * SCALPEL_IN_CM - this_uncertainty) < cm_dif && cm_dif < (2 * SCALPEL_IN_CM + this_uncertainty)))
+	{
+		annotationCode = SCALPEL_CODE;
+	}
+	else if (((RETRACTOR_IN_CM - this_uncertainty) < cm_dif && cm_dif < (RETRACTOR_IN_CM + this_uncertainty)))
+	{
+		annotationCode = RETRACTOR_CODE;
+	}
+	else if (((LONGHOOK_IN_CM - this_uncertainty) < cm_dif && cm_dif < (LONGHOOK_IN_CM + this_uncertainty))
+		|| ((2 * LONGHOOK_IN_CM - this_uncertainty) < cm_dif && cm_dif < (2 * LONGHOOK_IN_CM + this_uncertainty)))
+	{
+		annotationCode = LONGHOOK_CODE;
+	}
+
+	if(annotationCode>0)
+	{
+		createVirtualAnnotation(annotation_counter, position[0], position[1], annotationCode);
+	}
+}
+
+/*
  * Method Overview: Loads the images used during the GUI process
  * Parameters: None
  * Return: None

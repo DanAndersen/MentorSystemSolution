@@ -93,10 +93,7 @@ cv::Mat VirtualAnnotation::getImage()
 
 	if(selected_state)
 	{
-		cout << selectedImage.rows << endl;
-		cout << selectedImage.cols << endl;
 		sizeY = (int)(((selectedImage.rows*1920)/selectedImage.cols)*myZoom);
-		cout << sizeY << endl;
 		cv::resize(selectedImage,resized,cv::Size(sizeX,sizeY));
 	}
 	else

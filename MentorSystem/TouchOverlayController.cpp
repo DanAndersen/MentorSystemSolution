@@ -18,7 +18,6 @@
 
 //Include its header file
 #include "TouchOverlayController.h"
-#include "Config.h"
 
 //--------------------------Definitions--------------------------//
 #define BIG_VALUE 10000
@@ -30,7 +29,9 @@ GUIManager* TouchOverlayController::myGUI;
 CameraManager* TouchOverlayController::myCamera;
 int TouchOverlayController::annotationCounter;
 int TouchOverlayController::selected_annotation_code;
+double TouchOverlayController::last_param[2];
 vector<long double> TouchOverlayController::roi_extremes;
+vector<double> TouchOverlayController::real_element_features;
 unsigned short TouchOverlayController::last_type;
 int TouchOverlayController::button_clicked;
 bool TouchOverlayController::debugMessagesEnabled = false;
@@ -42,7 +43,6 @@ bool TouchOverlayController::debugMessagesEnabled = false;
  */
 TouchOverlayController::TouchOverlayController()
 {
-
 	TouchOverlayController::debugMessagesEnabled = false;
 
 	annotationCounter = 0;
@@ -82,6 +82,9 @@ int TouchOverlayController::Init(CommandCenter* pCommander, GUIManager* pGUI, Ca
 	myGUI = pGUI;
 
 	myCamera = pCamera;
+
+	last_param[0] = 0.0;
+	last_param[1] = 0.0;
 
 	//Successful Init
 	int err_code = PQMTE_SUCCESS;
@@ -162,7 +165,8 @@ void TouchOverlayController:: InitFuncOnTG()
 	m_pf_on_tges[TG_NEAR_PARALLEL_MOVE_RIGHT] = &TouchOverlayController::onTG_NearParrellMoveRight;
 	m_pf_on_tges[TG_NEAR_PARALLEL_MOVE_LEFT] = &TouchOverlayController::onTG_NearParrellMoveLeft;
 
-	m_pf_on_tges[TG_MULTI_DOWN] = &TouchOverlayController::onTG_MultiTouch;
+	m_pf_on_tges[TG_MULTI_DOWN] = &TouchOverlayController::onTG_MultiDown;
+	m_pf_on_tges[TG_MULTI_MOVE] = &TouchOverlayController::onTG_MultiMove;
 }
 
 /*
@@ -532,46 +536,18 @@ void TouchOverlayController:: OnTG_Move(const TouchGesture & tg,void * call_obje
 
 	assert(tg.type == TG_MOVE && tg.param_size >= 2);
 
-	cv::Point2d worldSpacePoint = spaceToWorld(tg.params);
+	if (!myCommander->getRealToolPlacedFlag())
+	{
+		cv::Point2d worldSpacePoint = spaceToWorld(tg.params);
 
-	//if(!button_clicked)
-	//{
 		if (myCommander->getLinesDrawableFlag())
 		{
 			myCommander->setLineDrawnFlag(1);
 			OpenGLtouchControls(ADD_POINT, annotationCounter, worldSpacePoint.x, worldSpacePoint.y);
 		}
-	//}
-}
-/*
-void TouchOverlayController::OnMove(long double x, long double y) {
-
-	if (TouchOverlayController::debugMessagesEnabled) {
-		std::cout << "OnMove" << std::endl;
-	}
-
-	std::cout << "moving moving, moving moving (8)" << std::endl;
-	
-	// input X/Y are in screen-space
-	// we need to convert to world-space to be able to manipulate annotations the way we want to
-	cv::Point2d worldSpacePoint = myCamera->convertScreenSpaceToWorldSpace(x, y);
-
-
-
-
-	if (myCommander->getLinesDrawableFlag())
-	{
-		myCommander->setLineDrawnFlag(1);
-		OpenGLtouchControls(ADD_POINT, annotationCounter, worldSpacePoint.x, worldSpacePoint.y);
-	}
-	else
-	{
-		myCommander->setRoiDrawnFlag(1);
-		roi_extremes.push_back(worldSpacePoint.x);
-		roi_extremes.push_back(worldSpacePoint.y);
 	}
 }
-*/
+
 /*
  * Method Overview: Handles the received move_right events
  * Parameters: Received touch gesture
@@ -585,13 +561,16 @@ void TouchOverlayController:: OnTG_MoveRight(const TouchGesture & tg,void * call
 
 	assert(tg.type == TG_MOVE_RIGHT);
 
-	cv::Point2d worldSpacePoint = spaceToWorld(tg.params);
-
-	if (!(myCommander->getLinesDrawableFlag()))
+	if (!myCommander->getRealToolPlacedFlag())
 	{
-		myCommander->setRoiDrawnFlag(1);
-		roi_extremes.push_back(worldSpacePoint.x);
-		roi_extremes.push_back(worldSpacePoint.y);
+		cv::Point2d worldSpacePoint = spaceToWorld(tg.params);
+
+		if (!(myCommander->getLinesDrawableFlag()))
+		{
+			myCommander->setRoiDrawnFlag(1);
+			roi_extremes.push_back(worldSpacePoint.x);
+			roi_extremes.push_back(worldSpacePoint.y);
+		}
 	}
 
 	last_type = tg.type;
@@ -610,14 +589,16 @@ void TouchOverlayController:: OnTG_MoveLeft(const TouchGesture & tg,void * call_
 	}
 
 	assert(tg.type == TG_MOVE_LEFT);
-
-	cv::Point2d worldSpacePoint = spaceToWorld(tg.params);
-
-	if (!(myCommander->getLinesDrawableFlag()))
+	if (!myCommander->getRealToolPlacedFlag())
 	{
-		myCommander->setRoiDrawnFlag(1);
-		roi_extremes.push_back(worldSpacePoint.x);
-		roi_extremes.push_back(worldSpacePoint.y);
+		cv::Point2d worldSpacePoint = spaceToWorld(tg.params);
+
+		if (!(myCommander->getLinesDrawableFlag()))
+		{
+			myCommander->setRoiDrawnFlag(1);
+			roi_extremes.push_back(worldSpacePoint.x);
+			roi_extremes.push_back(worldSpacePoint.y);
+		}
 	}
 	last_type = tg.type;
 }
@@ -627,21 +608,24 @@ void TouchOverlayController:: OnTG_MoveLeft(const TouchGesture & tg,void * call_
  * Parameters: Received touch gesture
  * Return: None
  */
-void TouchOverlayController:: OnTG_MoveDown(const TouchGesture & tg,void * call_object)
+void TouchOverlayController::OnTG_MoveDown(const TouchGesture & tg, void * call_object)
 {
 	if (TouchOverlayController::debugMessagesEnabled) {
 		std::cout << "OnTG_MoveDown" << std::endl;
 	}
 
 	assert(tg.type == TG_MOVE_DOWN);
-	
-	cv::Point2d worldSpacePoint = spaceToWorld(tg.params);
 
-	if (!(myCommander->getLinesDrawableFlag()))
+	if (!myCommander->getRealToolPlacedFlag())
 	{
-		myCommander->setRoiDrawnFlag(1);
-		roi_extremes.push_back(worldSpacePoint.x);
-		roi_extremes.push_back(worldSpacePoint.y);
+		cv::Point2d worldSpacePoint = spaceToWorld(tg.params);
+
+		if (!(myCommander->getLinesDrawableFlag()))
+		{
+			myCommander->setRoiDrawnFlag(1);
+			roi_extremes.push_back(worldSpacePoint.x);
+			roi_extremes.push_back(worldSpacePoint.y);
+		}
 	}
 	last_type = tg.type;
 }
@@ -659,14 +643,18 @@ void TouchOverlayController:: OnTG_MoveUp(const TouchGesture & tg,void * call_ob
 
 	assert(tg.type == TG_MOVE_UP);
 	
-	cv::Point2d worldSpacePoint = spaceToWorld(tg.params);
-
-	if (!(myCommander->getLinesDrawableFlag()))
+	if (!myCommander->getRealToolPlacedFlag())
 	{
-		myCommander->setRoiDrawnFlag(1);
-		roi_extremes.push_back(worldSpacePoint.x);
-		roi_extremes.push_back(worldSpacePoint.y);
+		cv::Point2d worldSpacePoint = spaceToWorld(tg.params);
+
+		if (!(myCommander->getLinesDrawableFlag()))
+		{
+			myCommander->setRoiDrawnFlag(1);
+			roi_extremes.push_back(worldSpacePoint.x);
+			roi_extremes.push_back(worldSpacePoint.y);
+		}
 	}
+
 	last_type = tg.type;
 }
 
@@ -683,45 +671,55 @@ void TouchOverlayController:: OnTG_TouchEnd(const TouchGesture & tg,void * call_
 
 	assert(tg.type == TG_TOUCH_END);
 	
-	if(last_type == TG_ROTATE_CLOCKWISE || last_type == TG_ROTATE_ANTICLOCKWISE || last_type == TG_SPLIT_APART || 
-		last_type == TG_SPLIT_CLOSE || last_type == TG_NEAR_PARALLEL_MOVE_RIGHT || last_type == TG_NEAR_PARALLEL_MOVE_LEFT || 
-		last_type == TG_NEAR_PARALLEL_MOVE_UP || last_type == TG_NEAR_PARALLEL_MOVE_DOWN)
+	if(!myCommander->getRealToolPlacedFlag())
 	{
-		if(myCommander->getVirtualAnnotationSelectedFlag())
+		if(last_type == TG_ROTATE_CLOCKWISE || last_type == TG_ROTATE_ANTICLOCKWISE || last_type == TG_SPLIT_APART || 
+			last_type == TG_SPLIT_CLOSE || last_type == TG_NEAR_PARALLEL_MOVE_RIGHT || last_type == TG_NEAR_PARALLEL_MOVE_LEFT || 
+			last_type == TG_NEAR_PARALLEL_MOVE_UP || last_type == TG_NEAR_PARALLEL_MOVE_DOWN)
 		{
-			myGUI->startJSONAnnotationUpdate();
+			if(myCommander->getVirtualAnnotationSelectedFlag())
+			{
+				myGUI->startJSONAnnotationUpdate();
+			}
+			else if(myCommander->getLineSelectedFlag())
+			{
+				startJSONLineUpdate();
+			}
 		}
-		else if(myCommander->getLineSelectedFlag())
-		{
-			startJSONLineUpdate();
-		}
-	}
 
-	//is draw mode is on, check if there is any line to draw
-	if(myCommander->getLinesDrawableFlag())
-	{
-		if(myCommander->getLineDrawnFlag())
+		//is draw mode is on, check if there is any line to draw
+		if(myCommander->getLinesDrawableFlag())
 		{
-			OpenGLtouchControls(ADD_LINE,annotationCounter,NULL,NULL);
+			if(myCommander->getLineDrawnFlag())
+			{
+				OpenGLtouchControls(ADD_LINE,annotationCounter,NULL,NULL);
 		
-			myCommander->setLineDrawnFlag(0);
+				myCommander->setLineDrawnFlag(0);
 
-			annotationCounter++;
+				annotationCounter++;
+			}
+			OpenGLtouchControls(CLEAR_LINE,NULL,NULL,NULL);
 		}
-		OpenGLtouchControls(CLEAR_LINE,NULL,NULL,NULL);
+		//is draw mode is off, check if there is a line selection roi
+		else
+		{
+			if(myCommander->getRoiDrawnFlag())
+			{
+				roi_extremes.push_back(roi_extremes.at(0));
+				roi_extremes.push_back(roi_extremes.at(1));
+
+				myCommander->setLineSelectedFlag(pointInPolygon(roi_extremes));
+
+				myCommander->setRoiDrawnFlag(0);
+			}
+		}
 	}
-	//is draw mode is off, check if there is a line selection roi
 	else
 	{
-		if(myCommander->getRoiDrawnFlag())
-		{
-			roi_extremes.push_back(roi_extremes.at(0));
-			roi_extremes.push_back(roi_extremes.at(1));
-
-			myCommander->setLineSelectedFlag(pointInPolygon(roi_extremes));
-
-			myCommander->setRoiDrawnFlag(0);
-		}
+		double totalhipDis = getRealToolMean();
+		myGUI->interpretRealTool(annotationCounter, totalhipDis, last_param);
+		annotationCounter++;
+		myCommander->setRealToolPlacedFlag(0);
 	}
 
 	last_type = tg.type;
@@ -740,13 +738,16 @@ void TouchOverlayController::OnTG_RotateClock(const TouchGesture & tg,void * cal
 
 	assert(tg.type == TG_ROTATE_CLOCKWISE);
 	
-	if(myCommander->getVirtualAnnotationSelectedFlag())
+	if (!myCommander->getRealToolPlacedFlag())
 	{
-		myGUI->GUItouchControls(ROTATE_CLK);
-	}
-	else if(myCommander->getLineSelectedFlag())
-	{
-		OpenGLtouchControls(ROTATE_CLK,NULL,NULL,NULL);
+		if (myCommander->getVirtualAnnotationSelectedFlag())
+		{
+			myGUI->GUItouchControls(ROTATE_CLK);
+		}
+		else if (myCommander->getLineSelectedFlag())
+		{
+			OpenGLtouchControls(ROTATE_CLK, NULL, NULL, NULL);
+		}
 	}
 
 	last_type = tg.type;
@@ -765,13 +766,16 @@ void TouchOverlayController::OnTG_RotateAntiClock(const TouchGesture & tg,void *
 
 	assert(tg.type == TG_ROTATE_ANTICLOCKWISE);
 	
-	if(myCommander->getVirtualAnnotationSelectedFlag())
+	if (!myCommander->getRealToolPlacedFlag())
 	{
-		myGUI->GUItouchControls(ROTATE_CNTR_CLK);
-	}
-	else if(myCommander->getLineSelectedFlag())
-	{
-		OpenGLtouchControls(ROTATE_CNTR_CLK,NULL,NULL,NULL);
+		if (myCommander->getVirtualAnnotationSelectedFlag())
+		{
+			myGUI->GUItouchControls(ROTATE_CNTR_CLK);
+		}
+		else if (myCommander->getLineSelectedFlag())
+		{
+			OpenGLtouchControls(ROTATE_CNTR_CLK, NULL, NULL, NULL);
+		}
 	}
 
 	last_type = tg.type;
@@ -788,15 +792,19 @@ void TouchOverlayController::OnTG_SplitApart(const TouchGesture & tg,void * call
 		std::cout << "OnTG_SplitApart" << std::endl;
 	}
 
+
 	assert(tg.type == TG_SPLIT_APART && tg.param_size >= 1);
 	
-	if(myCommander->getVirtualAnnotationSelectedFlag())
+	if (!myCommander->getRealToolPlacedFlag())
 	{
-		myGUI->GUItouchControls(ZOOM_IN);
-	}
-	else if(myCommander->getLineSelectedFlag())
-	{
-		OpenGLtouchControls(ZOOM_IN,NULL,NULL,NULL);
+		if (myCommander->getVirtualAnnotationSelectedFlag())
+		{
+			myGUI->GUItouchControls(ZOOM_IN);
+		}
+		else if (myCommander->getLineSelectedFlag())
+		{
+			OpenGLtouchControls(ZOOM_IN, NULL, NULL, NULL);
+		}
 	}
 
 	last_type = tg.type;
@@ -815,13 +823,16 @@ void TouchOverlayController::OnTG_SplitClose(const TouchGesture & tg,void * call
 
 	assert(tg.type == TG_SPLIT_CLOSE && tg.param_size >= 1);
 	
-	if(myCommander->getVirtualAnnotationSelectedFlag())
+	if (!myCommander->getRealToolPlacedFlag())
 	{
-		myGUI->GUItouchControls(ZOOM_OUT);
-	}
-	else if(myCommander->getLineSelectedFlag())
-	{
-		OpenGLtouchControls(ZOOM_OUT,NULL,NULL,NULL);
+		if (myCommander->getVirtualAnnotationSelectedFlag())
+		{
+			myGUI->GUItouchControls(ZOOM_OUT);
+		}
+		else if (myCommander->getLineSelectedFlag())
+		{
+			OpenGLtouchControls(ZOOM_OUT, NULL, NULL, NULL);
+		}
 	}
 
 	last_type = tg.type;
@@ -840,13 +851,16 @@ void TouchOverlayController::onTG_NearParrellMoveRight(const TouchGesture & tg,v
 
 	assert(tg.type == TG_NEAR_PARALLEL_MOVE_RIGHT);
 	
-	if(myCommander->getVirtualAnnotationSelectedFlag())
+	if (!myCommander->getRealToolPlacedFlag())
 	{
-		myGUI->GUItouchControls(TRANSLATE_RIGHT);
-	}
-	else if(myCommander->getLineSelectedFlag())
-	{
-		OpenGLtouchControls(TRANSLATE_RIGHT,NULL,NULL,NULL);
+		if (myCommander->getVirtualAnnotationSelectedFlag())
+		{
+			myGUI->GUItouchControls(TRANSLATE_RIGHT);
+		}
+		else if (myCommander->getLineSelectedFlag())
+		{
+			OpenGLtouchControls(TRANSLATE_RIGHT, NULL, NULL, NULL);
+		}
 	}
 
 	last_type = tg.type;
@@ -865,13 +879,16 @@ void TouchOverlayController::onTG_NearParrellMoveLeft(const TouchGesture & tg,vo
 
 	assert(tg.type == TG_NEAR_PARALLEL_MOVE_LEFT);
 	
-	if(myCommander->getVirtualAnnotationSelectedFlag())
+	if (!myCommander->getRealToolPlacedFlag())
 	{
-		myGUI->GUItouchControls(TRANSLATE_LEFT);
-	}
-	else if(myCommander->getLineSelectedFlag())
-	{
-		OpenGLtouchControls(TRANSLATE_LEFT,NULL,NULL,NULL);
+		if (myCommander->getVirtualAnnotationSelectedFlag())
+		{
+			myGUI->GUItouchControls(TRANSLATE_LEFT);
+		}
+		else if (myCommander->getLineSelectedFlag())
+		{
+			OpenGLtouchControls(TRANSLATE_LEFT, NULL, NULL, NULL);
+		}
 	}
 
 	last_type = tg.type;
@@ -891,13 +908,16 @@ void TouchOverlayController::onTG_NearParrellMoveUp(const TouchGesture & tg,void
 
 	assert(tg.type == TG_NEAR_PARALLEL_MOVE_UP);
 
-	if(myCommander->getVirtualAnnotationSelectedFlag())
+	if (!myCommander->getRealToolPlacedFlag())
 	{
-		myGUI->GUItouchControls(TRANSLATE_UP);
-	}
-	else if(myCommander->getLineSelectedFlag())
-	{
-		OpenGLtouchControls(TRANSLATE_UP,NULL,NULL,NULL);
+		if (myCommander->getVirtualAnnotationSelectedFlag())
+		{
+			myGUI->GUItouchControls(TRANSLATE_UP);
+		}
+		else if (myCommander->getLineSelectedFlag())
+		{
+			OpenGLtouchControls(TRANSLATE_UP, NULL, NULL, NULL);
+		}
 	}
 
 	last_type = tg.type;
@@ -916,40 +936,126 @@ void TouchOverlayController::onTG_NearParrellMoveDown(const TouchGesture & tg,vo
 
 	assert(tg.type == TG_NEAR_PARALLEL_MOVE_DOWN);
 	
-	if(myCommander->getVirtualAnnotationSelectedFlag())
+	if (!myCommander->getRealToolPlacedFlag())
 	{
-		myGUI->GUItouchControls(TRANSLATE_DOWN);
-	}
-	else if(myCommander->getLineSelectedFlag())
-	{
-		OpenGLtouchControls(TRANSLATE_DOWN,NULL,NULL,NULL);
+		if (myCommander->getVirtualAnnotationSelectedFlag())
+		{
+			myGUI->GUItouchControls(TRANSLATE_DOWN);
+		}
+		else if (myCommander->getLineSelectedFlag())
+		{
+			OpenGLtouchControls(TRANSLATE_DOWN, NULL, NULL, NULL);
+		}
 	}
 
 	last_type = tg.type;
 }
 
 /*
- * Method Overview: Handles the received multi touch events
+ * Method Overview: Handles the received multi down events
  * Parameters: Received multi touch gesture
  * Return: None
  */
-void TouchOverlayController::onTG_MultiTouch(const TouchGesture & tg,void * call_object)
+void TouchOverlayController::onTG_MultiDown(const TouchGesture & tg,void * call_object)
 {
 	if (TouchOverlayController::debugMessagesEnabled) {
-		std::cout << "onTG_NearParrellMoveDown" << std::endl;
+		std::cout << "onTG_MultiDown" << std::endl;
 	}
 
-	std::cout << "Multi Touch event" << std::endl;
-	std::cout << tg.param_size << std::endl;
 	const double* data = tg.params;
-	std::cout << data[0] << std::endl;
-	std::cout << data[1] << std::endl;
-	std::cout << data[2] << std::endl;
-	std::cout << data[3] << std::endl;
-	std::cout << data[4] << std::endl;
-	std::cout << data[5] << std::endl;
+	
+	const double params1[2] = { tg.params[2],tg.params[3] };
+	const double params2[2] = { tg.params[4],tg.params[5] };
 
+	double mininumDif = 10.0;
+	double dx = abs(params1[0] - params2[0]);
+	double dy = abs(params1[1] - params2[1]);
+
+	if(dx>mininumDif && dy>mininumDif)
+	{
+		cv::Point2d worldSpacePoint1 = spaceToWorld(params1);
+		cv::Point2d worldSpacePoint2 = spaceToWorld(params2);
+
+		double hipDis = sqrt((dx * dx) + (dy * dy));
+		//cout << hipDis << endl;
+		real_element_features.push_back(hipDis);
+		last_param[0] = params2[0];
+		last_param[1] = params2[1];
+		myCommander->setRealToolPlacedFlag(1);
+	}
 	last_type = tg.type;
+}
+
+/*
+* Method Overview: Handles the received multi move events
+* Parameters: Received multi touch gesture
+* Return: None
+*/
+void TouchOverlayController::onTG_MultiMove(const TouchGesture & tg, void * call_object)
+{
+	if (TouchOverlayController::debugMessagesEnabled) {
+		std::cout << "onTG_MultiMove" << std::endl;
+	}
+
+	const double* data = tg.params;
+
+	const double params1[2] = { tg.params[2],tg.params[3] };
+	const double params2[2] = { tg.params[4],tg.params[5] };
+	
+	double mininumDif = 10.0;
+	double dx = abs(params1[0] - params2[0]);
+	double dy = abs(params1[1] - params2[1]);
+
+	if (dx>mininumDif && dy>mininumDif)
+	{
+		cv::Point2d worldSpacePoint1 = spaceToWorld(params1);
+		cv::Point2d worldSpacePoint2 = spaceToWorld(params2);
+
+		double hipDis = sqrt((dx * dx) + (dy * dy));
+		real_element_features.push_back(hipDis);
+		last_param[0] = params2[0];
+		last_param[1] = params2[1];
+		myCommander->setRealToolPlacedFlag(1);
+	}
+	last_type = tg.type;
+}
+
+double TouchOverlayController::getRealToolMean()
+{
+	int i;
+	double biggest = 0;
+	double mean = 0;
+
+	for (i = 0; i < real_element_features.size(); i++)
+	{
+		if (real_element_features[i] > biggest)
+		{
+			biggest = real_element_features[i];
+		}
+	}
+
+	double difRate = biggest / 20.0;
+	int counter = 0;
+
+	for (i = 0; i < real_element_features.size(); i++)
+	{
+		if (abs(biggest - real_element_features[i]) <= difRate)
+		{
+			mean += real_element_features[i];
+			counter++;
+		}
+	}
+
+	mean /= counter;
+
+	double this_hyp = sqrt((SERVER_RESOLUTION_X * SERVER_RESOLUTION_X) + (SERVER_RESOLUTION_Y * SERVER_RESOLUTION_Y));
+	double this_cm_dif = (this_hyp * REF_CM_IN_PIX) / REF_HYP;
+
+	cout << mean/this_cm_dif << endl;
+
+	real_element_features.clear();
+
+	return mean;
 }
 
 cv::Point2d TouchOverlayController::spaceToWorld(const double* spaceCoord)

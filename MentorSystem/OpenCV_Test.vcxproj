@@ -161,6 +161,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(SolutionDir)Libraries\PQClient\include;$(SolutionDir)Libraries\glew-1.11.0\include;$(SolutionDir)Libraries\freeglut\include;$(SolutionDir)Libraries\opencv\build\include;$(SolutionDir)Libraries\ffmpeg32\include;%(AdditionalIncludeDirectories);$(SolutionDir)Libraries\msinttypes\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>__STDC_LIMIT_MACROS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

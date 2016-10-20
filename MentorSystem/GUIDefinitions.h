@@ -345,4 +345,48 @@
 #define THIRD_COLUMN_RIGHT_MARGIN 266
 #endif
 
+//---------------------Real Tools Definitions--------------------//
+//Reference hip
+#ifndef REF_HYP
+#define REF_HYP 2202.9072
+#endif
+
+//Centimeter to pix ratio
+#ifndef REF_CM_IN_PIX
+#define REF_CM_IN_PIX 13.2
+#endif
+
+//Pixel uncertainty
+#ifndef REF_PIX_UNCERTAINTY
+#define REF_PIX_UNCERTAINTY 0.3
+#endif
+
+#ifndef LONGHOOK_IN_CM
+#define LONGHOOK_IN_CM 7.5
+#endif
+
+#ifndef RETRACTOR_IN_CM
+#define RETRACTOR_IN_CM 11
+#endif
+
+#ifndef SCALPEL_IN_CM
+#define SCALPEL_IN_CM 5
+#endif
+
+#ifndef HEMOSTAT_IN_CM
+#define HEMOSTAT_IN_CM 9
+#endif
+
+#ifndef TWEEZERS_IN_CM
+#define TWEEZERS_IN_CM 4
+#endif
+
+#ifndef SYRINGE_IN_CM
+#define SYRINGE_IN_CM 3.5
+#endif
+
+#ifndef SCISSORS_IN_CM
+#define SCISSORS_IN_CM 3
+#endif
+
 #endif

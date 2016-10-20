@@ -45,6 +45,8 @@ CommandCenter::CommandCenter()
 	VirtualAnnotationSelected = 0;
 
 	JSONCreation = 0;
+
+	RealToolPlacedFlag = 0;
 }
 
 /*
@@ -285,4 +287,24 @@ int CommandCenter::getJSONCreationFlag()
 void CommandCenter::setJSONCreationFlag(int pFlag)
 {
 	JSONCreation = pFlag;
+}
+
+/*
+* Method Overview: Retrieves the Real Tool placement flag
+* Parameters: None
+* Return: Value of the Real Tool placement flag
+*/
+int CommandCenter::getRealToolPlacedFlag()
+{
+	return RealToolPlacedFlag;
+}
+
+/*
+* Method Overview: Sets the Real Tool placement flag
+* Parameters: Value to set the flag to
+* Return: None
+*/
+void CommandCenter::setRealToolPlacedFlag(int pFlag)
+{
+	RealToolPlacedFlag = pFlag;
 }

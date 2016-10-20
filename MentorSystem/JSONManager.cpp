@@ -126,9 +126,9 @@ void JSONManager::constructLineJSONMessage(int id, string command, vector<long d
 	message["id"] = id;
 	message["command"] = command;
 
-	annotation_memory["matches"] = Json::objectValue;
-	annotation_memory["initialKeyPoints"] = Json::arrayValue;
-	annotation_memory["initialDescriptors"] = Json::objectValue;
+	//annotation_memory["matches"] = Json::objectValue;//
+	//annotation_memory["initialKeyPoints"] = Json::arrayValue;//
+	//annotation_memory["initialDescriptors"] = Json::objectValue;//
 
 	int counter;
 
@@ -142,11 +142,12 @@ void JSONManager::constructLineJSONMessage(int id, string command, vector<long d
 
 	initialAnnotation["annotationType"] = POLYLINE_ANNOTATION;
 
-	annotation_memory["initialAnnotation"] = initialAnnotation;
-	annotation_memory["currentAnnotation"] = initialAnnotation;
-	annotation_memory["currentHomography"] = Json::objectValue;
-	annotation_memory["initialRawKeyPoints"] = Json::arrayValue;
-	annotation_memory["currentRawKeyPoints"] = Json::arrayValue;
+	annotation_memory["annotation"] = initialAnnotation;
+	/*annotation_memory["initialAnnotation"] = initialAnnotation;//delete
+	annotation_memory["currentAnnotation"] = initialAnnotation;//delete
+	annotation_memory["currentHomography"] = Json::objectValue;//
+	annotation_memory["initialRawKeyPoints"] = Json::arrayValue;//
+	annotation_memory["currentRawKeyPoints"] = Json::arrayValue;*///
 
 	message["annotation_memory"] = annotation_memory;
 
@@ -181,9 +182,9 @@ void JSONManager::constructVirtualAnnotationJSONMessage(int id, string command, 
 	message["id"] = id;
 	message["command"] = command;
 
-	annotation_memory["matches"] = Json::objectValue;
-	annotation_memory["initialKeyPoints"] = Json::arrayValue;
-	annotation_memory["initialDescriptors"] = Json::objectValue;
+	//annotation_memory["matches"] = Json::objectValue;//
+	//annotation_memory["initialKeyPoints"] = Json::arrayValue;//
+	//annotation_memory["initialDescriptors"] = Json::objectValue;//
 
 	annotationPoints["x"] = (annotation_information[0]/RESOLUTION_X);
 	annotationPoints["y"] = (annotation_information[1]/RESOLUTION_Y);
@@ -195,11 +196,12 @@ void JSONManager::constructVirtualAnnotationJSONMessage(int id, string command, 
 	initialAnnotation["toolType"] = annotation_name;
 	initialAnnotation["selectableColor"] = 0;
 
-	annotation_memory["initialAnnotation"] = initialAnnotation;
-	annotation_memory["currentAnnotation"] = initialAnnotation;
-	annotation_memory["currentHomography"] = Json::objectValue;
-	annotation_memory["initialRawKeyPoints"] = Json::arrayValue;
-	annotation_memory["currentRawKeyPoints"] = Json::arrayValue;
+	annotation_memory["annotation"] = initialAnnotation;
+	/*annotation_memory["initialAnnotation"] = initialAnnotation;//delete
+	annotation_memory["currentAnnotation"] = initialAnnotation;//delete
+	annotation_memory["currentHomography"] = Json::objectValue;//
+	annotation_memory["initialRawKeyPoints"] = Json::arrayValue;//
+	annotation_memory["currentRawKeyPoints"] = Json::arrayValue;*///
 
 	message["annotation_memory"] = annotation_memory;
 

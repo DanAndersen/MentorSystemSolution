@@ -35,6 +35,7 @@
 #include "annotationCommands.h"//Annotation-related commands
 #include "JSONDefinitions.h"////General JSON definitions
 #include "virtualAnnotationDefinitions.h"//Virtual annotation codes
+#include "Config.h"
 #include <mutex>
 
 class GUIManager
@@ -65,6 +66,9 @@ public:
 
 	//Gives the signal to start the creation of JSON UpdateCommands
 	void startJSONAnnotationUpdate();
+
+	//Handles the real tools placement interpretation process
+	void interpretRealTool(int annotation_counter, double difference, const double* position);
 
 	//------------------------Variables--------------------------//
 	//None

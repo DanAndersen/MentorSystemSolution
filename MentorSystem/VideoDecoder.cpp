@@ -36,6 +36,14 @@ bool VideoDecoder::decode(char* in_buffer, int in_buffer_size, cv::Mat* out_mat)
 			uint8_t * outData[1] = { rgb24Data };	// rgb24 has one plane
 			int outLinesize[1] = { 3*this->_decoderWidthPixels };	// rgb stride
 
+			std::cout << "decodedMatColsnRows: " << decodedMat->cols << "," << decodedMat->rows << std::endl;
+			std::cout << "outLinesize[0]: " << outLinesize[0] << std::endl;
+			std::cout << "_decoder_frame->height: " << this->_decoder_frame->height << std::endl;
+			std::cout << "_decoder_frame->linesize: " << this->_decoder_frame->linesize << std::endl;
+			std::cout << "_decoderHeightPixels: " << this->_decoderHeightPixels << std::endl;
+				//this->_decoder_frame->linesize
+				//this->_decoderHeightPixels
+
 			sws_scale(this->_decoder_sws, this->_decoder_frame->data, this->_decoder_frame->linesize, 0, this->_decoderHeightPixels, outData, outLinesize);
 
 			returnValue = true;

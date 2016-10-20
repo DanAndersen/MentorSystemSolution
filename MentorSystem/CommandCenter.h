@@ -104,6 +104,12 @@ public:
 	//Changes the state of the JSON creation flag
 	void setJSONCreationFlag(int pFlag);
 
+	//Gets the JSON creation flag
+	int getRealToolPlacedFlag();
+
+	//Changes the state of the JSON creation flag
+	void setRealToolPlacedFlag(int pFlag);
+
 	//------------------------Variables--------------------------//
 	//None
 
@@ -147,6 +153,9 @@ private:
 
 	//JSON Creation flag
 	int JSONCreation;
+
+	//Real tool placement flag
+	int RealToolPlacedFlag;
 };
 
 #endif
